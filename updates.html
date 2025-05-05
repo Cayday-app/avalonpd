@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APD Portal - Updates</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+            <a href="index.html">HOME</a>
+            <a href="restricted.html" class="restricted-nav">ROSTER</a>
+            <a href="sop.html" class="restricted-nav">SOP</a>
+            <a href="department-group.html" class="restricted-nav">GROUP</a>
+            <a href="shift-logging.html" class="restricted-nav">SHIFT LOG</a>
+            <a href="officer-chat.html" class="restricted-nav">LIVE CHAT</a>
+            <a href="create-update.html" class="restricted-create">CREATE UPDATE</a>
+            <a href="updates.html">UPDATES</a>
+            <button onclick="handleDiscordAuth()" class="login-btn">LOGIN WITH DISCORD</button>
+        </div>
+    </nav>
+
+    <!-- Updates Section -->
+    <section class="updates-section">
+        <h2>DEPARTMENT UPDATES</h2>
+        <div class="updates-grid">
+            <p class="no-updates">No updates available at this time.</p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html> 

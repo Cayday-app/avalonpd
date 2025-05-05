@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APD Portal - Officer Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+            <a href="index.html">HOME</a>
+            <a href="restricted.html" class="restricted-nav">ROSTER</a>
+            <a href="sop.html" class="restricted-nav">SOP</a>
+            <a href="department-group.html" class="restricted-nav">GROUP</a>
+            <a href="shift-logging.html" class="restricted-nav">SHIFT LOG</a>
+            <a href="officer-chat.html" class="restricted-nav">LIVE CHAT</a>
+            <a href="create-update.html" class="restricted-create">CREATE UPDATE</a>
+            <a href="updates.html">UPDATES</a>
+            <div class="nav-icons">
+                <button id="theme-btn" class="theme-btn">⚙️</button>
+                <button onclick="handleDiscordAuth()" class="login-btn">LOGIN WITH DISCORD</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="chat-container">
+        <div class="chat-sidebar">
+            <div class="chat-sidebar-header">
+                <h3>Officers</h3>
+                <div class="online-indicator">
+                    <span class="online-dot"></span>
+                    <span id="online-count">0</span> Online
+                </div>
+            </div>
+            <div class="officer-list" id="officer-list">
+                <!-- Officers will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="chat-main">
+            <div class="chat-header">
+                <h2>APD Live Chat</h2>
+                <div class="chat-actions">
+                    <button id="refresh-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                    <button id="clear-btn" title="Clear Chat"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <img src="apdlogo.png" alt="APD Logo">
+                    </div>
+                    <div class="welcome-text">
+                        <h3>Welcome to the APD Officer Chat!</h3>
+                        <p>Tag officers with @username. Only logged in officers can send and view messages.</p>
+                    </div>
+                </div>
+                <!-- Messages will be loaded here -->
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea id="chat-input" placeholder="Type a message... Use @ to mention officers" rows="2"></textarea>
+                    <div class="chat-buttons">
+                        <button id="emoji-btn" class="emoji-button"><i class="far fa-smile"></i></button>
+                        <button id="send-btn" class="send-button"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+                <div class="emoji-picker" id="emoji-picker">
+                    <!-- Emojis will be populated here -->
+                </div>
+                <div class="mention-menu" id="mention-menu">
+                    <!-- Officer mentions will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="chat.js"></script>
+    <footer>
+        © Made by Cayday
+    </footer>
+</body>
+</html> 

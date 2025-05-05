@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APD Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+            <a href="index.html">HOME</a>
+            <a href="coc.html">COC</a>
+            <a href="restricted.html" class="restricted-nav">ROSTER</a>
+            <a href="sop.html" class="restricted-nav">SOP</a>
+            <a href="department-group.html" class="restricted-nav">GROUP</a>
+            <a href="shift-logging.html" class="restricted-nav">SHIFT LOG</a>
+            <a href="officer-chat.html" class="restricted-nav">LIVE CHAT</a>
+            <a href="create-update.html" class="restricted-create">CREATE UPDATE</a>
+            <a href="updates.html">UPDATES</a>
+            <div class="nav-icons">
+                <button id="theme-btn" class="theme-btn">⚙️</button>
+                <button onclick="handleDiscordAuth()" class="login-btn">LOGIN WITH DISCORD</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Theme selection modal -->
+    <div id="theme-modal" class="theme-modal">
+        <div class="theme-modal-content">
+            <span id="close-theme-modal" class="close">&times;</span>
+            <h2>Choose Theme</h2>
+            <div class="theme-type-options">
+                <label><input type="radio" name="theme-type" value="solid" checked> Solid</label>
+                <label><input type="radio" name="theme-type" value="gradient"> Gradient</label>
+            </div>
+            <div class="theme-color-pickers">
+                <label>Color 1: <input type="color" id="theme-color1" value="#0f0f0f"></label>
+                <label>Color 2: <input type="color" id="theme-color2" value="#3498db"></label>
+            </div>
+            <button id="apply-theme-btn">Apply</button>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1>AVALON POLICE DEPARTMENT</h1>
+        <p style="font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px;">
+            Dedicated to keeping our city safe through professionalism, integrity, and community service.
+        </p>
+        <div class="join-button-container">
+            <a href="https://discord.gg/FP9uUBQJSt" target="_blank" class="join-button">
+                JOIN NOW
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Updates Section -->
+    <section class="recent-updates-section">
+        <h2>RECENT UPDATES</h2>
+        <div class="updates-bubble-container">
+            <!-- Content will be loaded dynamically using JavaScript -->
+        </div>
+    </section>
+
+    <section class="team-section">
+        <h2>MEET OUR TEAM</h2>
+        <div class="team-grid">
+            <div class="team-member">
+                <img src="placeholder.jpg" alt="Team Member">
+                <h3>Jefferson Rebel</h3>
+                <div class="role">Chief of Police</div>
+                <p>Leading the department with years of experience.</p>
+            </div>
+
+            <div class="team-member">
+                <img src="placeholder2.jpg" alt="Team Member">
+                <h3>D. Cooper</h3>
+                <div class="role">Police Major</div>
+                <p>I'm the Police Major with Avalon PD. I oversee multiple divisions, coordinate department-wide operations, and ensure our long-term strategies keep this city safe.</p>
+            </div>
+
+            <div class="team-member">
+                <img src="placeholder3.jpg" alt="Team Member">
+                <h3>That_guy</h3>
+                <div class="role">Police Captain</div>
+                <p>I'm a Captain with Avalon PD. I manage day-to-day operations within my division, lead our officers on the ground, and make sure our team runs smoothly and effectively.</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+    <script src="floating-chat.js"></script>
+    <footer>
+        © Made by Cayday
+    </footer>
+</body>
+</html> 

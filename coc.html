@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APD - Chain of Command</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .coc-container {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 20px;
+        }
+
+        .coc-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .coc-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .coc-description {
+            max-width: 800px;
+            margin: 0 auto 40px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .rank-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .rank-level {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .rank-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 25px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .rank-icon {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .rank-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .rank-description {
+            font-size: 0.9rem;
+            color: #999;
+            line-height: 1.5;
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 3px;
+        }
+
+        .badge-star {
+            color: #ffd700;
+            font-size: 0.8rem;
+        }
+
+        /* Connectors */
+        .connector {
+            position: absolute;
+            background: #333;
+            z-index: -1;
+        }
+
+        .vertical-connector {
+            width: 2px;
+            height: 30px;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .coc-title {
+                font-size: 2rem;
+            }
+
+            .coc-description {
+                font-size: 1rem;
+                padding: 0 20px;
+            }
+
+            .rank-card {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+            <a href="index.html">HOME</a>
+            <a href="coc.html" class="active">COC</a>
+            <a href="restricted.html" class="restricted-nav">ROSTER</a>
+            <a href="sop.html" class="restricted-nav">SOP</a>
+            <a href="department-group.html" class="restricted-nav">GROUP</a>
+            <a href="shift-logging.html" class="restricted-nav">SHIFT LOG</a>
+            <a href="officer-chat.html" class="restricted-nav">LIVE CHAT</a>
+            <a href="create-update.html" class="restricted-create">CREATE UPDATE</a>
+            <a href="updates.html">UPDATES</a>
+            <div class="nav-icons">
+                <button onclick="handleDiscordAuth()" class="login-btn">LOGIN WITH DISCORD</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="coc-container">
+        <div class="coc-header">
+            <h1 class="coc-title">Chain of Command</h1>
+            <p class="coc-description">
+                The Avalon Police Department operates under a structured chain of command that ensures efficient communication, clear leadership, and effective department operations. Each rank carries specific responsibilities and authority, working together to serve and protect our community.
+            </p>
+        </div>
+        
+        <div class="rank-tree">
+            <!-- Chief Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-chess-king rank-icon"></i>
+                    <h2 class="rank-title">Chief of Police</h2>
+                    <div class="rank-badge">
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                    </div>
+                    <div class="rank-description">
+                        Department head responsible for overall leadership, policy-making, and strategic direction of the APD.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Deputy Chief Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-chess-queen rank-icon"></i>
+                    <h2 class="rank-title">Deputy Chief</h2>
+                    <div class="rank-badge">
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                    </div>
+                    <div class="rank-description">
+                        Second-in-command, assists the Chief in department management and can assume command when needed.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Assistant Chief Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-trophy rank-icon"></i>
+                    <h2 class="rank-title">Assistant Chief</h2>
+                    <div class="rank-badge">
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                    </div>
+                    <div class="rank-description">
+                        Oversees major divisions and special operations, reporting directly to the Deputy Chief.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Major Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-award rank-icon"></i>
+                    <h2 class="rank-title">Major</h2>
+                    <div class="rank-badge">
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                    </div>
+                    <div class="rank-description">
+                        Commands operational units and implements departmental policies and strategies.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Captain Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-medal rank-icon"></i>
+                    <h2 class="rank-title">Captain</h2>
+                    <div class="rank-badge">
+                        <i class="fas fa-star badge-star"></i>
+                        <i class="fas fa-star badge-star"></i>
+                    </div>
+                    <div class="rank-description">
+                        Manages precinct operations and supervises multiple units within their command.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Lieutenant Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-shield-alt rank-icon"></i>
+                    <h2 class="rank-title">Lieutenant</h2>
+                    <div class="rank-badge">
+                        <i class="fas fa-star badge-star"></i>
+                    </div>
+                    <div class="rank-description">
+                        Oversees shift operations and serves as a bridge between command staff and patrol officers.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Sergeant Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-user-shield rank-icon"></i>
+                    <h2 class="rank-title">Sergeant</h2>
+                    <div class="rank-description">
+                        First-line supervisors who directly oversee patrol officers and daily operations.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Senior Officer Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-user-tie rank-icon"></i>
+                    <h2 class="rank-title">Senior Officer</h2>
+                    <div class="rank-description">
+                        Experienced officers who mentor newer officers and handle specialized assignments.
+                    </div>
+                    <div class="connector vertical-connector"></div>
+                </div>
+            </div>
+            
+            <!-- Officer Level -->
+            <div class="rank-level">
+                <div class="rank-card">
+                    <i class="fas fa-user rank-icon"></i>
+                    <h2 class="rank-title">Officer</h2>
+                    <div class="rank-description">
+                        Patrol officers who serve as the primary point of contact with the community.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html> 

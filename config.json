@@ -1,0 +1,9 @@
+{
+    "discord": {
+        "clientId": "1363747847039881347",
+        "guildId": "1363747433074655433",
+        "requiredRoles": ["1363749144266674267"],
+        "creatorRole": "1363771721177628692",
+        "redirectUri": "http://localhost:3000"
+    }
+} 

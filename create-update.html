@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APD Portal - Create Announcement</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+            <a href="index.html">HOME</a>
+            <a href="restricted.html" class="restricted-nav">ROSTER</a>
+            <a href="sop.html" class="restricted-nav">SOP</a>
+            <a href="department-group.html" class="restricted-nav">GROUP</a>
+            <a href="shift-logging.html" class="restricted-nav">SHIFT LOG</a>
+            <a href="officer-chat.html" class="restricted-nav">LIVE CHAT</a>
+            <a href="create-update.html" class="restricted-create">CREATE UPDATE</a>
+            <a href="updates.html">UPDATES</a>
+            <button onclick="handleDiscordAuth()" class="login-btn">LOGIN WITH DISCORD</button>
+        </div>
+    </nav>
+
+    <div class="create-update-container">
+        <!-- Creator Profile Preview -->
+        <div class="create-profile">
+            <img src="" alt="Your Avatar" class="create-avatar" />
+            <span class="create-username"></span>
+        </div>
+        <h2>Create Announcement</h2>
+        <form id="update-form">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="image">Image URL (optional)</label>
+            <input type="text" id="image" name="image" placeholder="Optional: image URL">
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5" required></textarea>
+
+            <button type="submit">Publish</button>
+            <input type="hidden" id="creatorAvatar" name="creatorAvatar">
+            <input type="hidden" id="creatorUsername" name="creatorUsername">
+        </form>
+        <div id="form-msg" style="margin-top:1rem;color:var(--accent);"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    // Populate hidden creatorAvatar and profile preview
+    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    // Populate hidden creatorAvatar and creatorUsername
+    document.getElementById('creatorAvatar').value = userData.avatar
+        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`
+        : '';
+    document.getElementById('creatorUsername').value = userData.username || '';
+    if (userData.username) {
+        const avatarEl = document.querySelector('.create-avatar');
+        const usernameEl = document.querySelector('.create-username');
+        avatarEl.src = userData.avatar
+            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`
+            : 'https://cdn.discordapp.com/embed/avatars/0.png';
+        usernameEl.textContent = userData.username;
+    }
+    document.getElementById('update-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const data = {};
+        new FormData(e.target).forEach((v, k) => data[k] = v);
+        try {
+            const token = localStorage.getItem('discord_token');
+            console.log('Submitting announcement', data, token);
+            const res = await fetch('/api/updates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                document.getElementById('form-msg').textContent = 'Announcement created successfully!';
+                e.target.reset();
+            } else {
+                const err = await res.json();
+                console.error('Error creating announcement:', err);
+                document.getElementById('form-msg').textContent = err.error || 'Error creating announcement.';
+            }
+        } catch (err) {
+            document.getElementById('form-msg').textContent = 'Network error.';
+        }
+    });
+    </script>
+</body>
+</html> 
