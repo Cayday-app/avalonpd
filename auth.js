@@ -93,7 +93,7 @@ function updateLoginState() {
 // Handle Discord auth
 function handleDiscordAuth() {
     const clientId = '1363747847039881347';  // Use direct value since we know it
-    const redirectUri = 'http://localhost:3000';  // Use direct value to ensure correct format
+    const redirectUri = 'https://avalonpd.netlify.app';  // Use direct value to ensure correct format
     const scope = 'identify guilds';
     
     const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
