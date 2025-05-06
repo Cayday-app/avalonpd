@@ -5,7 +5,18 @@ const config = {
         guildId: '1363747433074655433',
         requiredRoles: ['1363749144266674267'],
         creatorRole: '1363771721177628692', // HR-only role
-        redirectUri: 'https://avalonpd.netlify.app'  
+        redirectUri: 'https://avalonpd.netlify.app',
+        debug: true // Enable debug mode
+    }
+};
+
+// Make config globally available for debugging
+window.config = config;
+
+// Enable console logging only in debug mode
+const debugLog = (...args) => {
+    if (config.discord.debug) {
+        console.log('[DEBUG]', ...args);
     }
 };
 
@@ -208,7 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Handle Discord Authentication
 function handleDiscordAuth() {
-    const authUrl = `https://discord.com/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${encodeURIComponent(config.discord.redirectUri)}&response_type=code&scope=${encodeURIComponent('identify guilds.members.read')}&guild_id=${config.discord.guildId}&disable_guild_select=true`;
+    // Use more comprehensive scopes to ensure we get everything needed
+    const scopes = encodeURIComponent('identify email guilds guilds.members.read');
+    const authUrl = `https://discord.com/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${encodeURIComponent(config.discord.redirectUri)}&response_type=code&scope=${scopes}&guild_id=${config.discord.guildId}&disable_guild_select=true&prompt=consent`;
+    debugLog('Auth URL:', authUrl);
     window.location.href = authUrl;
 }
 
@@ -216,6 +230,10 @@ function handleDiscordAuth() {
 async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
+        debugLog('Exchanging code for token via Netlify function...');
+        debugLog('Code:', code?.substring(0, 5) + '...');
+        debugLog('Redirect URI:', config.discord.redirectUri);
+        
         const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
             headers: {
@@ -224,13 +242,28 @@ async function handleAuthCode(code) {
             body: JSON.stringify({ code, redirectUri: config.discord.redirectUri })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('Token exchange failed:', errorData);
-            throw new Error('Failed to exchange code for token');
+        const responseText = await response.text();
+        debugLog('Auth response status:', response.status);
+        let data;
+        
+        try {
+            data = JSON.parse(responseText);
+            debugLog('Auth response data:', data);
+        } catch (e) {
+            console.error('Failed to parse auth response:', responseText);
+            throw new Error('Invalid response from auth server');
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+            console.error('Token exchange failed:', data);
+            throw new Error(data.error || 'Failed to exchange code for token');
+        }
+
+        if (!data.access_token) {
+            console.error('No access token in response:', data);
+            throw new Error('No access token received');
+        }
+
         localStorage.setItem('discord_token', data.access_token);
         showToast('Successfully authenticated!');
         checkUserRoles(data.access_token);
@@ -242,7 +275,7 @@ async function handleAuthCode(code) {
         window.history.replaceState({}, document.title, '/');
     } catch (error) {
         console.error('Error exchanging code for token:', error);
-        showToast('Authentication failed. Please try again.', true);
+        showToast(`Authentication failed: ${error.message}. Please try again.`, true);
     }
 }
 
@@ -250,6 +283,7 @@ async function handleAuthCode(code) {
 async function checkUserRoles(token) {
     try {
         showToast('Checking permissions...');
+        debugLog('Checking user roles with token:', token?.substring(0, 10) + '...');
         
         // Use Netlify function to check user and member data
         const response = await fetch('/.netlify/functions/discord-roles', {
@@ -261,15 +295,27 @@ async function checkUserRoles(token) {
             body: JSON.stringify({ guildId: config.discord.guildId })
         });
         
-        if (!response.ok) {
-            console.error('Failed to fetch role data:', await response.text());
-            throw new Error('Failed to fetch role data');
+        // First try to get the response as text
+        const responseText = await response.text();
+        debugLog('Role check response status:', response.status);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+            debugLog('Role check data:', data);
+        } catch (e) {
+            console.error('Failed to parse role check response:', responseText);
+            throw new Error('Invalid response from roles server');
         }
         
-        const data = await response.json();
+        if (!response.ok) {
+            console.error('Failed to fetch role data:', data);
+            throw new Error(data.error || 'Failed to verify permissions');
+        }
         
         // Store user data
         if (data.user) {
+            debugLog('User data received:', data.user);
             localStorage.setItem('user_data', JSON.stringify({
                 id: data.user.id,
                 username: data.user.username,
@@ -278,10 +324,14 @@ async function checkUserRoles(token) {
             }));
             updateLoginButton(data.user);
             showToast('Successfully logged in!');
+        } else {
+            console.error('No user data received');
+            throw new Error('No user data received');
         }
         
         // Check roles
         if (data.member) {
+            debugLog('Member data received, roles:', data.member.roles);
             const hasAccess = data.member.roles.some(role => config.discord.requiredRoles.includes(role));
             localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
             if (hasAccess) {
@@ -291,10 +341,15 @@ async function checkUserRoles(token) {
             // store roles
             localStorage.setItem('roles', JSON.stringify(data.member.roles));
             updatePrivileges();
+        } else {
+            debugLog('No member data received, you may not be in the server');
+            // Still allow login even without member data
+            localStorage.setItem('has_access', 'false');
+            localStorage.setItem('roles', '[]');
         }
     } catch (error) {
         console.error('Error fetching user data:', error);
-        showToast('Failed to verify permissions', true);
+        showToast(`Permission check failed: ${error.message}`, true);
     }
 }
 
