@@ -5,7 +5,7 @@ const config = {
         guildId: '1363747433074655433',
         requiredRoles: ['1363749144266674267'],
         creatorRole: '1363771721177628692', // HR-only role
-        redirectUri: 'http://localhost:3000'  
+        redirectUri: 'https://avalonpd.netlify.app'  
     }
 };
 
