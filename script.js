@@ -216,15 +216,17 @@ function handleDiscordAuth() {
 async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
-        const response = await fetch('/api/discord/token', {
+        const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ code })
+            body: JSON.stringify({ code, redirectUri: config.discord.redirectUri })
         });
 
         if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Token exchange failed:', errorData);
             throw new Error('Failed to exchange code for token');
         }
 
@@ -248,45 +250,51 @@ async function handleAuthCode(code) {
 async function checkUserRoles(token) {
     try {
         showToast('Checking permissions...');
-        // First, get the user's ID and info
-        const userResponse = await fetch('https://discord.com/api/users/@me', {
-            headers: { Authorization: `Bearer ${token}` }
+        
+        // Use Netlify function to check user and member data
+        const response = await fetch('/.netlify/functions/discord-roles', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ guildId: config.discord.guildId })
         });
-        if (!userResponse.ok) throw new Error('Failed to fetch user data');
-        const userData = await userResponse.json();
-        localStorage.setItem('user_data', JSON.stringify({
-            id: userData.id,
-            username: userData.username,
-            discriminator: userData.discriminator,
-            avatar: userData.avatar
-        }));
-        updateLoginButton(userData);
-        showToast('Successfully logged in!');
-
-        // Then check roles
-        try {
-            const memberResponse = await fetch(`https://discord.com/api/users/@me/guilds/${config.discord.guildId}/member`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (memberResponse.ok) {
-                const memberData = await memberResponse.json();
-                const hasAccess = memberData.roles.some(role => config.discord.requiredRoles.includes(role));
-                localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
-                if (hasAccess) {
-                    unlockRestrictedContent();
-                    showToast('Additional access granted!');
-                }
-                // store roles
-                localStorage.setItem('roles', JSON.stringify(memberData.roles));
-                updatePrivileges();
+        
+        if (!response.ok) {
+            console.error('Failed to fetch role data:', await response.text());
+            throw new Error('Failed to fetch role data');
+        }
+        
+        const data = await response.json();
+        
+        // Store user data
+        if (data.user) {
+            localStorage.setItem('user_data', JSON.stringify({
+                id: data.user.id,
+                username: data.user.username,
+                discriminator: data.user.discriminator,
+                avatar: data.user.avatar
+            }));
+            updateLoginButton(data.user);
+            showToast('Successfully logged in!');
+        }
+        
+        // Check roles
+        if (data.member) {
+            const hasAccess = data.member.roles.some(role => config.discord.requiredRoles.includes(role));
+            localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
+            if (hasAccess) {
+                unlockRestrictedContent();
+                showToast('Additional access granted!');
             }
-        } catch (error) {
-            console.error('Error checking roles:', error);
+            // store roles
+            localStorage.setItem('roles', JSON.stringify(data.member.roles));
+            updatePrivileges();
         }
     } catch (error) {
         console.error('Error fetching user data:', error);
-        showToast('Failed to log in', true);
-        logout();
+        showToast('Failed to verify permissions', true);
     }
 }
 

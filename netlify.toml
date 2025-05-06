@@ -1,0 +1,14 @@
+[build]
+  functions = "netlify/functions"
+
+[dev]
+  functions = "netlify/functions"
+  
+[build.environment]
+  # Set NODE_VERSION for the build environment
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 

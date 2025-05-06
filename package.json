@@ -19,7 +19,7 @@
     "express-session": "^1.18.1",
     "next": "^15.3.1",
     "next-auth": "^4.24.11",
-    "node-fetch": "^2.6.9",
+    "node-fetch": "^2.7.0",
     "postcss": "^8.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
