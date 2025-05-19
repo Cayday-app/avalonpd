@@ -851,7 +851,11 @@ document.addEventListener('DOMContentLoaded', () => {
             eventSource.close();
         }
 
-        eventSource = new EventSource('/.netlify/functions/notifications', { withCredentials: false });
+        const url = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8888/.netlify/functions/notifications'
+            : '/.netlify/functions/notifications';
+
+        eventSource = new EventSource(url);
         
         eventSource.onopen = function() {
             console.log('SSE connection established');
@@ -864,6 +868,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Handle different notification types
                 switch (data.type) {
+                    case 'connected':
+                        console.log('Connected to SSE:', data.message);
+                        break;
+                        
                     case 'new-message':
                         if (!messages.some(m => m.id === data.message.id)) {
                             messages.push(data.message);
