@@ -247,14 +247,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load messages from server
     function loadMessages() {
+        const token = localStorage.getItem('discord_token');
+        if (!token) return;
+
         fetch('/.netlify/functions/chat', {
             headers: {
-                'Authorization': localStorage.getItem('discord_token')
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to load messages');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
@@ -268,9 +272,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Send message function with optimizations
+    // Send message to server
     function sendMessage() {
         if (!chatInput.value.trim()) return;
+
+        const token = localStorage.getItem('discord_token');
+        const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        
+        if (!token || !userData.id) {
+            showToast('You must be logged in to send messages', true);
+            return;
+        }
 
         const messageData = {
             text: chatInput.value,
@@ -282,22 +294,21 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/.netlify/functions/chat', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('discord_token')
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(messageData)
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to send message');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
-        .then(newMessage => {
-            messages.push(newMessage);
+        .then(message => {
+            messages.push(message);
             renderMessages();
             chatInput.value = '';
-            messageContainer.scrollTop = messageContainer.scrollHeight;
         })
         .catch(error => {
             console.error('Error sending message:', error);
@@ -309,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sendBtn.addEventListener('click', sendMessage);
     
     // Listen for Enter key (but not with Shift)
-    chatInput.addEventListener('keydown', (e) => {
+    chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
@@ -793,29 +804,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Register current user as active
+    // Register active user
     async function registerActiveUser() {
+        const token = localStorage.getItem('discord_token');
+        const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        
+        if (!token || !userData.id) return;
+
         try {
             const response = await fetch('/.netlify/functions/discord-status', {
                 method: 'POST',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    id: userData.id,
+                    userId: userData.id,
                     username: userData.username,
-                    avatar: userData.avatar 
-                        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
-                        : 'https://cdn.discordapp.com/embed/avatars/0.png'
+                    avatar: userData.avatar
                 })
             });
-            
+
             if (!response.ok) {
-                throw new Error('Failed to register as active');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
+            // Start heartbeat after successful registration
+            startHeartbeat();
         } catch (error) {
-            console.error('Error registering active user:', error);
+            console.error('Error registering user:', error);
+            setTimeout(registerActiveUser, 5000); // Retry after 5 seconds
         }
     }
     
