@@ -1,5 +1,12 @@
 [build]
   publish = "/"
+  command = "echo 'No build command needed'"
+
+[build.processing]
+  skip_processing = true
+
+[build.environment]
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
   
 [[redirects]]
   from = "/*"
