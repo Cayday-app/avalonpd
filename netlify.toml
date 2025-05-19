@@ -1,5 +1,5 @@
 [build]
-  publish = "/"
+  publish = "."
   functions = "netlify/functions"
   command = "echo 'No build command needed'"
 
@@ -11,6 +11,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["fs", "path"]
   
 [[redirects]]
   from = "/*"

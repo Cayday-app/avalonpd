@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load messages from server
     function loadMessages() {
         const token = localStorage.getItem('discord_token');
-        fetch('/api/chat/messages', {
+        fetch('/.netlify/functions/chat', {
             headers: {
                 'Authorization': token
             }
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (editingMessageId) {
             // Edit existing message
-            fetch(`/api/chat/messages/${editingMessageId}`, {
+            fetch(`/.netlify/functions/chat/${editingMessageId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -319,13 +319,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Failed to edit message');
                 return response.json();
             })
-            .then(() => {
+            .then(updatedMessage => {
                 editingMessageId = null;
                 chatInput.disabled = false;
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalBtnHtml;
                 removeMessageById(tempMessage.id);
-                loadMessages(); // Refresh messages
+                
+                // Update the message in our local array
+                const messageIndex = messages.findIndex(m => m.id === updatedMessage.id);
+                if (messageIndex !== -1) {
+                    messages[messageIndex] = updatedMessage;
+                }
+                renderMessages();
             })
             .catch(error => {
                 console.error('Error editing message:', error);
@@ -337,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             // Send new message
-            fetch('/api/chat/messages', {
+            fetch('/.netlify/functions/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -356,13 +362,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Failed to send message');
                 return response.json();
             })
-            .then(() => {
+            .then(newMessage => {
                 chatInput.value = '';
                 chatInput.disabled = false;
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalBtnHtml;
                 removeMessageById(tempMessage.id);
-                loadMessages(); // Refresh messages
+                
+                // Add the new message to our local array
+                messages.push(newMessage);
+                renderMessages();
             })
             .catch(error => {
                 console.error('Error sending message:', error);
@@ -446,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Are you sure you want to delete this message?')) return;
         
         const token = localStorage.getItem('discord_token');
-        fetch(`/api/chat/messages/${id}?authorId=${userData.id}`, {
+        fetch(`/.netlify/functions/chat/${id}?authorId=${userData.id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': token
@@ -456,8 +465,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to delete message');
             return response.json();
         })
-        .then(() => {
-            removeMessageById(id);
+        .then(deletedMessage => {
+            removeMessageById(deletedMessage.id);
             showToast('Message deleted');
         })
         .catch(error => {
@@ -466,33 +475,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Add reaction to message with improved error handling and local state updates
+    // Add reaction to message
     function addReaction(messageId, emoji) {
-        // Show immediate feedback by adding a temporary reaction class
-        const tempKey = `temp-${Date.now()}`;
-        const message = document.querySelector(`.message[data-id="${messageId}"]`);
-        
-        // Find message in our local array
+        const token = localStorage.getItem('discord_token');
         const messageIndex = messages.findIndex(m => m.id === messageId);
         if (messageIndex === -1) {
             showToast('Message not found', true);
             return;
         }
         
-        // Check if the reaction already exists in our local data
+        // Optimistic update
         const reactions = messages[messageIndex].reactions || [];
         const existingReactionIndex = reactions.findIndex(r => 
             r.emoji === emoji && r.userId === userData.id
         );
         
-        // Handle local state update for immediate feedback
         let updatedReactions;
-        
         if (existingReactionIndex !== -1) {
-            // Remove locally
             updatedReactions = reactions.filter((_, i) => i !== existingReactionIndex);
         } else {
-            // Add locally
             updatedReactions = [...reactions, {
                 emoji,
                 username: userData.username,
@@ -500,17 +501,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }];
         }
         
-        // Update local state immediately
+        // Update UI immediately
         messages[messageIndex].reactions = updatedReactions;
-        
-        // Update UI right away for responsiveness
-        if (message) {
-            updateMessageReactions(messageId, updatedReactions);
-        }
+        updateMessageReactions(messageId, updatedReactions);
         
         // Make API call
-        const token = localStorage.getItem('discord_token');
-        fetch(`/api/chat/messages/${messageId}/reactions`, {
+        fetch(`/.netlify/functions/chat/${messageId}/reactions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -523,25 +519,20 @@ document.addEventListener('DOMContentLoaded', () => {
             })
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add reaction');
-            }
+            if (!response.ok) throw new Error('Failed to update reaction');
             return response.json();
         })
         .then(data => {
-            // Update with the server's canonical data
+            // Update with server data
             messages[messageIndex].reactions = data.reactions;
             updateMessageReactions(messageId, data.reactions);
         })
         .catch(error => {
-            console.error('Error adding reaction:', error);
-            showToast('Failed to add reaction', true);
-            
-            // Revert to previous state on error
-            if (messageIndex !== -1) {
-                messages[messageIndex].reactions = reactions;
-                updateMessageReactions(messageId, reactions);
-            }
+            console.error('Error updating reaction:', error);
+            showToast('Failed to update reaction', true);
+            // Revert to original state
+            messages[messageIndex].reactions = reactions;
+            updateMessageReactions(messageId, reactions);
         });
     }
     
