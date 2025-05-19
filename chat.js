@@ -759,7 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await registerActiveUser();
                 
                 // Then fetch all active users
-                const response = await fetch('/.netlify/functions/chat/active');
+                const response = await fetch('/.netlify/functions/discord-status');
                 if (!response.ok) {
                     throw new Error('Failed to fetch active users');
                 }
@@ -832,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchActiveOfficers();
     
     // Set up event source for real-time updates
-    const eventSource = new EventSource('/.netlify/functions/notifications/stream');
+    const eventSource = new EventSource('/.netlify/functions/notifications');
     
     eventSource.onmessage = function(event) {
         try {

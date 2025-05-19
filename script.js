@@ -782,3 +782,9 @@ function connectToNotificationStream() {
         console.error('Failed to connect to notification stream:', error);
     }
 }
+
+// Theme initialization
+function initializeTheme() {
+    const theme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+}
