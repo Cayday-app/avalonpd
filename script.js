@@ -754,33 +754,65 @@ function createUpdateBubble(update) {
 
 // Connect to Server-Sent Events for real-time notifications
 function connectToNotificationStream() {
-    try {
-        const eventSource = new EventSource('/.netlify/functions/notifications');
-        
-        eventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            console.log('SSE message:', data);
+    let retryCount = 0;
+    const maxRetries = 5;
+    const baseDelay = 1000; // Start with 1 second delay
+
+    function connect() {
+        try {
+            const eventSource = new EventSource('/.netlify/functions/notifications', {
+                withCredentials: false
+            });
             
-            if (data.type === 'connected') {
-                console.log('Connected to notification stream');
-            } 
-            else if (data.type === 'new-update') {
-                // Show notification for the new update
-                showUpdateNotification(data.update);
-                console.log('Received new update notification from server');
+            eventSource.addEventListener('open', () => {
+                console.log('SSE connection opened');
+                retryCount = 0; // Reset retry count on successful connection
+            });
+
+            eventSource.addEventListener('message', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('SSE message:', data);
+                    
+                    if (data.type === 'connected') {
+                        console.log('Connected to notification stream');
+                    } 
+                    else if (data.type === 'new-update') {
+                        showUpdateNotification(data.update);
+                        console.log('Received new update notification from server');
+                    }
+                } catch (err) {
+                    console.error('Error parsing SSE message:', err);
+                }
+            });
+            
+            eventSource.addEventListener('error', (err) => {
+                console.error('EventSource error:', err);
+                eventSource.close();
+                
+                // Implement exponential backoff for reconnection
+                if (retryCount < maxRetries) {
+                    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+                    retryCount++;
+                    console.log(`Reconnecting in ${delay}ms (attempt ${retryCount}/${maxRetries})`);
+                    setTimeout(connect, delay);
+                } else {
+                    console.error('Max retry attempts reached. Stopping reconnection.');
+                }
+            });
+            
+        } catch (error) {
+            console.error('Failed to connect to notification stream:', error);
+            if (retryCount < maxRetries) {
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+                retryCount++;
+                setTimeout(connect, delay);
             }
-        };
-        
-        eventSource.onerror = function(err) {
-            console.error('EventSource error:', err);
-            eventSource.close();
-            // Try to reconnect after a delay
-            setTimeout(connectToNotificationStream, 5000);
-        };
-        
-    } catch (error) {
-        console.error('Failed to connect to notification stream:', error);
+        }
     }
+
+    // Start the initial connection
+    connect();
 }
 
 // Theme initialization

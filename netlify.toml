@@ -1,11 +1,11 @@
 [build]
   publish = "."
-  functions = ".netlify/functions"
-  command = "cd .netlify/functions && npm install"
+  functions = "functions"
+  command = "cd functions && npm install"
 
 [build.environment]
-  NODE_VERSION = "16"
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
 
 [[redirects]]
   from = "/*"
