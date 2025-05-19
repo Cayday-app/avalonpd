@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(cors());
@@ -27,7 +28,7 @@ async function validateToken(token) {
 }
 
 // Chat API endpoints
-app.get('/api/chat/messages', async (req, token) => {
+app.get('/api/chat/messages', async (req, res) => {
     try {
         // Validate token
         const token = req.headers.authorization;
@@ -63,9 +64,47 @@ app.post('/api/chat/messages', async (req, res) => {
         messages.push(newMessage);
         fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
         
-        res.json({ success: true });
+        res.json(newMessage);
     } catch (error) {
         console.error('Error saving message:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Add reactions endpoint
+app.post('/api/chat/messages/:id/reactions', async (req, res) => {
+    try {
+        // Validate token
+        const token = req.headers.authorization;
+        if (!token || !(await validateToken(token))) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const messages = JSON.parse(fs.readFileSync(CHAT_FILE, 'utf8'));
+        const messageId = parseInt(req.params.id);
+        const messageIndex = messages.findIndex(m => m.id === messageId);
+        
+        if (messageIndex === -1) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+        
+        const reaction = req.body;
+        const existingReactionIndex = messages[messageIndex].reactions.findIndex(r => 
+            r.emoji === reaction.emoji && r.userId === reaction.userId
+        );
+        
+        if (existingReactionIndex !== -1) {
+            // Remove reaction if it exists
+            messages[messageIndex].reactions.splice(existingReactionIndex, 1);
+        } else {
+            // Add new reaction
+            messages[messageIndex].reactions.push(reaction);
+        }
+        
+        fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
+        res.json({ reactions: messages[messageIndex].reactions });
+    } catch (error) {
+        console.error('Error handling reaction:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -94,7 +133,7 @@ app.put('/api/chat/messages/:id', async (req, res) => {
         messages[messageIndex].edited = true;
         
         fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
-        res.json({ success: true });
+        res.json(messages[messageIndex]);
     } catch (error) {
         console.error('Error editing message:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -122,9 +161,9 @@ app.delete('/api/chat/messages/:id', async (req, res) => {
             return res.status(403).json({ error: 'Not authorized to delete this message' });
         }
         
-        messages.splice(messageIndex, 1);
+        const deletedMessage = messages.splice(messageIndex, 1)[0];
         fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
-        res.json({ success: true });
+        res.json(deletedMessage);
     } catch (error) {
         console.error('Error deleting message:', error);
         res.status(500).json({ error: 'Internal server error' });

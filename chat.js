@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Make API call
         const token = localStorage.getItem('discord_token');
-        fetch(`/.netlify/functions/chat/${messageId}/reactions`, {
+        fetch(`/api/chat/messages/${messageId}/reactions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -529,8 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            // Server will notify all clients via SSE,
-            // but we update with the server's canonical data
+            // Update with the server's canonical data
             messages[messageIndex].reactions = data.reactions;
             updateMessageReactions(messageId, data.reactions);
         })
