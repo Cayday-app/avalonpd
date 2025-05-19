@@ -73,24 +73,33 @@
         try {
             const token = localStorage.getItem('discord_token');
             console.log('Submitting announcement', data, token);
-            const res = await fetch('/api/updates', {
+            const res = await fetch('/.netlify/functions/updates', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': token
                 },
                 body: JSON.stringify(data)
             });
             if (res.ok) {
                 document.getElementById('form-msg').textContent = 'Announcement created successfully!';
                 e.target.reset();
+                // Notify all clients about the new update
+                const eventSource = new EventSource('/.netlify/functions/notifications');
+                eventSource.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'new-update') {
+                        showUpdateNotification(data.update);
+                    }
+                };
             } else {
                 const err = await res.json();
                 console.error('Error creating announcement:', err);
                 document.getElementById('form-msg').textContent = err.error || 'Error creating announcement.';
             }
         } catch (err) {
-            document.getElementById('form-msg').textContent = 'Network error.';
+            console.error('Network error:', err);
+            document.getElementById('form-msg').textContent = 'Network error. Please try again.';
         }
     });
     </script>

@@ -367,8 +367,23 @@ async function loadUpdates() {
     if (!grid) return;
     grid.innerHTML = '';
     try {
-        const res = await fetch('/updates.json');
+        const token = localStorage.getItem('discord_token');
+        const res = await fetch('/.netlify/functions/updates', {
+            headers: {
+                'Authorization': token
+            }
+        });
+        if (!res.ok) throw new Error('Failed to load updates');
         const updates = await res.json();
+        
+        if (updates.length === 0) {
+            grid.innerHTML = '<p class="no-updates">No updates available</p>';
+            return;
+        }
+        
+        // Sort by newest first
+        updates.sort((a, b) => b.timestamp - a.timestamp);
+        
         updates.forEach(item => {
             const bubble = document.createElement('div');
             bubble.className = 'update-bubble';
@@ -391,28 +406,30 @@ async function loadUpdates() {
             // If user has HR role, add delete button
             const roles = JSON.parse(localStorage.getItem('roles') || '[]');
             if (config.discord.creatorRole && roles.includes(config.discord.creatorRole)) {
-                const token = localStorage.getItem('discord_token');
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = '×';
                 deleteBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    console.log('Attempting delete update', item.id);
-                    try {
-                        const resp = await fetch(`/api/updates/${item.id}`, {
-                            method: 'DELETE',
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-                        if (resp.ok) {
-                            showToast('Update deleted');
-                            loadUpdates();
-                        } else {
-                            console.error('Failed to delete update, status:', resp.status);
-                            showToast('Failed to delete update', true);
+                    if (confirm('Are you sure you want to delete this update?')) {
+                        try {
+                            const resp = await fetch(`/.netlify/functions/updates/${item.id}`, {
+                                method: 'DELETE',
+                                headers: { 
+                                    'Authorization': token
+                                }
+                            });
+                            if (resp.ok) {
+                                showToast('Update deleted');
+                                loadUpdates();
+                            } else {
+                                console.error('Failed to delete update, status:', resp.status);
+                                showToast('Failed to delete update', true);
+                            }
+                        } catch (err) {
+                            console.error('Error deleting update', err);
+                            showToast('Error deleting update', true);
                         }
-                    } catch (err) {
-                        console.error('Error deleting update', err);
-                        showToast('Error deleting update', true);
                     }
                 };
                 bubble.appendChild(deleteBtn);
@@ -421,6 +438,7 @@ async function loadUpdates() {
         });
     } catch (err) {
         console.error('Failed to load updates', err);
+        grid.innerHTML = '<p class="error-message">Failed to load updates. Please try again later.</p>';
     }
 }
 
@@ -653,8 +671,13 @@ async function loadRecentUpdates() {
     if (!container) return; // Not on the homepage
     
     try {
-        // Get updates from JSON
-        const res = await fetch('/updates.json');
+        const token = localStorage.getItem('discord_token');
+        const res = await fetch('/.netlify/functions/updates', {
+            headers: {
+                'Authorization': token
+            }
+        });
+        if (!res.ok) throw new Error('Failed to load updates');
         const updates = await res.json();
         
         if (updates.length === 0) {
@@ -663,7 +686,7 @@ async function loadRecentUpdates() {
         }
         
         // Sort by newest first
-        updates.sort((a, b) => b.id - a.id);
+        updates.sort((a, b) => b.timestamp - a.timestamp);
         
         // Take only the latest 4 updates
         const recentUpdates = updates.slice(0, 4);
