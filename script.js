@@ -418,11 +418,14 @@ function logout() {
 // Function to check if user has access to a specific page
 function checkPageAccess() {
     const token = localStorage.getItem('discord_token');
-    if (!token) {
+    const hasAccess = localStorage.getItem('has_access') === 'true';
+    
+    if (!token || !hasAccess) {
         window.location.href = '/';
         return false;
     }
-    return checkUserRoles(token);
+    
+    return true;
 }
 
 // Show loading overlay until page fully loads
