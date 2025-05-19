@@ -1,19 +1,32 @@
 // Auth handling
 document.addEventListener('DOMContentLoaded', function() {
-    // Load config
-    const defaultConfig = {
-        discord: {
-            clientId: '1363747847039881347',
-            requiredRoles: ['905142674228772905'] // APD role ID
-        }
-    };
-    
-    window.config = window.config || defaultConfig;
-    
+    // Load config from config.json
+    fetch('/config.json')
+        .then(response => response.json())
+        .then(loadedConfig => {
+            window.config = loadedConfig;
+            initializeAuth();
+        })
+        .catch(error => {
+            console.error('Failed to load config:', error);
+            // Fallback to default config
+            window.config = {
+                discord: {
+                    clientId: '1363747847039881347',
+                    guildId: '1363747433074655433',
+                    requiredRoles: ['1363749144266674267'],
+                    creatorRole: '1363771721177628692',
+                    redirectUri: 'https://avalonpd.netlify.app'
+                }
+            };
+            initializeAuth();
+        });
+});
+
+function initializeAuth() {
     // Check login state
     const token = localStorage.getItem('discord_token');
     const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-    const userRoles = JSON.parse(localStorage.getItem('roles') || '[]');
     
     // Update UI based on login state
     updateLoginState();
@@ -32,40 +45,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
     
-    // Add event listener to theme button
-    const themeBtn = document.getElementById('theme-btn');
-    const themeModal = document.getElementById('theme-modal');
+    // Handle OAuth code if present
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
     
-    if (themeBtn && themeModal) {
-        themeBtn.addEventListener('click', function() {
-            themeModal.style.display = 'flex';
-        });
-        
-        // Close theme modal
-        const closeThemeModal = document.getElementById('close-theme-modal');
-        if (closeThemeModal) {
-            closeThemeModal.addEventListener('click', function() {
-                themeModal.style.display = 'none';
-            });
-        }
-        
-        // Apply theme
-        const applyThemeBtn = document.getElementById('apply-theme-btn');
-        if (applyThemeBtn) {
-            applyThemeBtn.addEventListener('click', function() {
-                const color1 = document.getElementById('theme-color1').value;
-                const color2 = document.getElementById('theme-color2').value;
-                const themeType = document.querySelector('input[name="theme-type"]:checked').value;
-                
-                updateTheme(color1, color2, themeType);
-                themeModal.style.display = 'none';
-            });
-        }
+    if (accessToken) {
+        handleAuthToken(accessToken, tokenType);
     }
-    
-    // Load saved theme
-    loadSavedTheme();
-});
+}
 
 // Update login button
 function updateLoginState() {
@@ -92,29 +79,90 @@ function updateLoginState() {
 
 // Handle Discord auth
 function handleDiscordAuth() {
-    const clientId = '1363747847039881347';  // Use direct value since we know it
-    const redirectUri = 'https://avalonpd.netlify.app';  // Use direct value to ensure correct format
-    const scope = 'identify guilds';
+    const config = window.config.discord;
+    const scopes = encodeURIComponent('identify guilds guilds.members.read');
     
-    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
+    const authUrl = `https://discord.com/oauth2/authorize` + 
+        `?client_id=${config.clientId}` +
+        `&redirect_uri=${encodeURIComponent(config.redirectUri)}` +
+        `&response_type=token` +
+        `&scope=${scopes}` +
+        `&guild_id=${config.guildId}` +
+        `&prompt=consent`;
     
     window.location.href = authUrl;
 }
 
-// Handle logout
-function handleLogout() {
-    if (confirm('Are you sure you want to log out?')) {
-        // Clear stored auth data
-        localStorage.removeItem('discord_token');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('roles');
+// Handle the authorization token from Discord
+async function handleAuthToken(accessToken, tokenType) {
+    try {
+        showToast('Authenticating...');
+        
+        // Store the token
+        localStorage.setItem('discord_token', accessToken);
+        
+        // Fetch user data
+        const userResponse = await fetch('https://discord.com/api/users/@me', {
+            headers: {
+                'Authorization': `${tokenType} ${accessToken}`
+            }
+        });
+        
+        if (!userResponse.ok) throw new Error('Failed to fetch user data');
+        const userData = await userResponse.json();
+        localStorage.setItem('user_data', JSON.stringify(userData));
+        
+        // Fetch guild member data
+        const guildId = window.config.discord.guildId;
+        const memberResponse = await fetch(`https://discord.com/api/users/@me/guilds/${guildId}/member`, {
+            headers: {
+                'Authorization': `${tokenType} ${accessToken}`
+            }
+        });
+        
+        if (!memberResponse.ok) throw new Error('Failed to fetch member data');
+        const memberData = await memberResponse.json();
+        
+        // Check roles
+        const roles = memberData.roles || [];
+        localStorage.setItem('roles', JSON.stringify(roles));
+        
+        const hasAccess = roles.some(role => 
+            window.config.discord.requiredRoles.includes(role)
+        );
+        localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
         
         // Update UI
         updateLoginState();
         updateRestrictedNav();
         
-        // Reload page
-        window.location.reload();
+        // Clean up URL
+        window.history.replaceState({}, document.title, '/');
+        showToast('Successfully logged in!');
+        
+    } catch (error) {
+        console.error('Authentication error:', error);
+        showToast('Authentication failed: ' + error.message, true);
+        localStorage.removeItem('discord_token');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('has_access');
+    }
+}
+
+// Handle logout
+function handleLogout() {
+    if (confirm('Are you sure you want to log out?')) {
+        localStorage.removeItem('discord_token');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('has_access');
+        
+        updateLoginState();
+        updateRestrictedNav();
+        
+        showToast('Successfully logged out');
+        setTimeout(() => window.location.reload(), 1000);
     }
 }
 
@@ -122,24 +170,69 @@ function handleLogout() {
 function updateRestrictedNav() {
     const token = localStorage.getItem('discord_token');
     const userRoles = JSON.parse(localStorage.getItem('roles') || '[]');
-    const requiredRoles = window.config.discord.requiredRoles || [];
-    
-    const hasAPDRole = userRoles.some(role => requiredRoles.includes(role));
+    const hasAccess = localStorage.getItem('has_access') === 'true';
     
     const restrictedNavItems = document.querySelectorAll('.restricted-nav');
-    const restrictedCreateItems = document.querySelectorAll('.restricted-create');
-    
-    // Show/hide restricted nav items based on roles
     restrictedNavItems.forEach(item => {
-        item.style.display = (token && hasAPDRole) ? 'block' : 'none';
+        item.style.display = (token && hasAccess) ? 'block' : 'none';
     });
     
-    // Show/hide create update based on HR role
-    const hasHRRole = userRoles.includes('905142677034016778'); // HR role ID
+    const restrictedCreateItems = document.querySelectorAll('.restricted-create');
+    const hasCreatorRole = userRoles.includes(window.config.discord.creatorRole);
     restrictedCreateItems.forEach(item => {
-        item.style.display = (token && hasHRRole) ? 'block' : 'none';
+        item.style.display = (token && hasCreatorRole) ? 'block' : 'none';
     });
 }
+
+// Toast notification helper
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (isError ? ' error' : '');
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }, 100);
+}
+
+// Add event listener to theme button
+const themeBtn = document.getElementById('theme-btn');
+const themeModal = document.getElementById('theme-modal');
+
+if (themeBtn && themeModal) {
+    themeBtn.addEventListener('click', function() {
+        themeModal.style.display = 'flex';
+    });
+    
+    // Close theme modal
+    const closeThemeModal = document.getElementById('close-theme-modal');
+    if (closeThemeModal) {
+        closeThemeModal.addEventListener('click', function() {
+            themeModal.style.display = 'none';
+        });
+    }
+    
+    // Apply theme
+    const applyThemeBtn = document.getElementById('apply-theme-btn');
+    if (applyThemeBtn) {
+        applyThemeBtn.addEventListener('click', function() {
+            const color1 = document.getElementById('theme-color1').value;
+            const color2 = document.getElementById('theme-color2').value;
+            const themeType = document.querySelector('input[name="theme-type"]:checked').value;
+            
+            updateTheme(color1, color2, themeType);
+            themeModal.style.display = 'none';
+        });
+    }
+}
+
+// Load saved theme
+loadSavedTheme();
 
 // Update theme
 function updateTheme(color1, color2, themeType) {

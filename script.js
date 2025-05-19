@@ -316,14 +316,14 @@ async function checkUserRoles(token) {
         // Store user data
         if (data.user) {
             debugLog('User data received:', data.user);
-            localStorage.setItem('user_data', JSON.stringify({
+        localStorage.setItem('user_data', JSON.stringify({
                 id: data.user.id,
                 username: data.user.username,
                 discriminator: data.user.discriminator,
                 avatar: data.user.avatar
-            }));
+        }));
             updateLoginButton(data.user);
-            showToast('Successfully logged in!');
+        showToast('Successfully logged in!');
         } else {
             console.error('No user data received');
             throw new Error('No user data received');
@@ -333,14 +333,14 @@ async function checkUserRoles(token) {
         if (data.member) {
             debugLog('Member data received, roles:', data.member.roles);
             const hasAccess = data.member.roles.some(role => config.discord.requiredRoles.includes(role));
-            localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
-            if (hasAccess) {
-                unlockRestrictedContent();
-                showToast('Additional access granted!');
-            }
-            // store roles
+                localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
+                if (hasAccess) {
+                    unlockRestrictedContent();
+                    showToast('Additional access granted!');
+                }
+                // store roles
             localStorage.setItem('roles', JSON.stringify(data.member.roles));
-            updatePrivileges();
+                updatePrivileges();
         } else {
             debugLog('No member data received, you may not be in the server');
             // Still allow login even without member data
