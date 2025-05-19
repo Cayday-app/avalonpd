@@ -1,22 +1,6 @@
 [build]
-  functions = "netlify/functions"
-
-[dev]
-  functions = "netlify/functions"
+  publish = "/"
   
-[build.environment]
-  # Set NODE_VERSION for the build environment
-  NODE_VERSION = "18"
-  # Set development mode for better error logging
-  NODE_ENV = "development"
-
-# These are just placeholders to remind that these environment variables are required
-# Actual values should be set in the Netlify dashboard
-[template.environment]
-  DISCORD_CLIENT_ID = "Discord application client ID"
-  DISCORD_CLIENT_SECRET = "Discord application client secret"
-  DISCORD_GUILD_ID = "Discord server/guild ID"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
