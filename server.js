@@ -5,17 +5,40 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.')); // Serve static files from current directory
+app.use(express.static('.'));
 
-// Ensure chat messages file exists
-const CHAT_FILE = path.join(__dirname, 'chat_messages.json');
-if (!fs.existsSync(CHAT_FILE)) {
-    fs.writeFileSync(CHAT_FILE, JSON.stringify([]));
+// Message storage
+const MESSAGES_FILE = path.join(__dirname, 'messages.json');
+
+// Helper to read messages
+function readMessages() {
+    try {
+        if (!fs.existsSync(MESSAGES_FILE)) {
+            return [];
+        }
+        return JSON.parse(fs.readFileSync(MESSAGES_FILE, 'utf8'));
+    } catch (error) {
+        console.error('Error reading messages:', error);
+        return [];
+    }
 }
 
-// Validate Discord token
+// Helper to write messages
+function writeMessages(messages) {
+    try {
+        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2));
+    } catch (error) {
+        console.error('Error writing messages:', error);
+        throw error;
+    }
+}
+
+// Helper to validate Discord token
 async function validateToken(token) {
     try {
         const response = await fetch('https://discord.com/api/users/@me', {
@@ -23,36 +46,41 @@ async function validateToken(token) {
         });
         return response.ok;
     } catch (error) {
+        console.error('Token validation error:', error);
         return false;
     }
 }
 
-// Chat API endpoints
-app.get('/api/chat/messages', async (req, res) => {
-    try {
-        // Validate token
-        const token = req.headers.authorization;
-        if (!token || !(await validateToken(token))) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
+// Auth middleware
+async function authMiddleware(req, res, next) {
+    const token = req.headers.authorization;
+    
+    if (!token) {
+        return res.status(401).json({ error: 'No authorization token provided' });
+    }
 
-        const messages = JSON.parse(fs.readFileSync(CHAT_FILE, 'utf8'));
+    const isValid = await validateToken(token);
+    if (!isValid) {
+        return res.status(401).json({ error: 'Invalid authorization token' });
+    }
+
+    next();
+}
+
+// Chat endpoints
+app.get('/api/chat', authMiddleware, (req, res) => {
+    try {
+        const messages = readMessages();
         res.json(messages);
     } catch (error) {
-        console.error('Error reading messages:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error getting messages:', error);
+        res.status(500).json({ error: 'Failed to get messages' });
     }
 });
 
-app.post('/api/chat/messages', async (req, res) => {
+app.post('/api/chat', authMiddleware, (req, res) => {
     try {
-        // Validate token
-        const token = req.headers.authorization;
-        if (!token || !(await validateToken(token))) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
-        const messages = JSON.parse(fs.readFileSync(CHAT_FILE, 'utf8'));
+        const messages = readMessages();
         const newMessage = {
             id: Date.now(),
             ...req.body,
@@ -62,62 +90,17 @@ app.post('/api/chat/messages', async (req, res) => {
         };
         
         messages.push(newMessage);
-        fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
-        
+        writeMessages(messages);
         res.json(newMessage);
     } catch (error) {
-        console.error('Error saving message:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error creating message:', error);
+        res.status(500).json({ error: 'Failed to create message' });
     }
 });
 
-// Add reactions endpoint
-app.post('/api/chat/messages/:id/reactions', async (req, res) => {
+app.put('/api/chat/:id', authMiddleware, (req, res) => {
     try {
-        // Validate token
-        const token = req.headers.authorization;
-        if (!token || !(await validateToken(token))) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
-        const messages = JSON.parse(fs.readFileSync(CHAT_FILE, 'utf8'));
-        const messageId = parseInt(req.params.id);
-        const messageIndex = messages.findIndex(m => m.id === messageId);
-        
-        if (messageIndex === -1) {
-            return res.status(404).json({ error: 'Message not found' });
-        }
-        
-        const reaction = req.body;
-        const existingReactionIndex = messages[messageIndex].reactions.findIndex(r => 
-            r.emoji === reaction.emoji && r.userId === reaction.userId
-        );
-        
-        if (existingReactionIndex !== -1) {
-            // Remove reaction if it exists
-            messages[messageIndex].reactions.splice(existingReactionIndex, 1);
-        } else {
-            // Add new reaction
-            messages[messageIndex].reactions.push(reaction);
-        }
-        
-        fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
-        res.json({ reactions: messages[messageIndex].reactions });
-    } catch (error) {
-        console.error('Error handling reaction:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-app.put('/api/chat/messages/:id', async (req, res) => {
-    try {
-        // Validate token
-        const token = req.headers.authorization;
-        if (!token || !(await validateToken(token))) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
-        const messages = JSON.parse(fs.readFileSync(CHAT_FILE, 'utf8'));
+        const messages = readMessages();
         const messageId = parseInt(req.params.id);
         const messageIndex = messages.findIndex(m => m.id === messageId);
         
@@ -132,46 +115,67 @@ app.put('/api/chat/messages/:id', async (req, res) => {
         messages[messageIndex].text = req.body.text;
         messages[messageIndex].edited = true;
         
-        fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
+        writeMessages(messages);
         res.json(messages[messageIndex]);
     } catch (error) {
-        console.error('Error editing message:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error updating message:', error);
+        res.status(500).json({ error: 'Failed to update message' });
     }
 });
 
-app.delete('/api/chat/messages/:id', async (req, res) => {
+app.delete('/api/chat/:id', authMiddleware, (req, res) => {
     try {
-        // Validate token
-        const token = req.headers.authorization;
-        if (!token || !(await validateToken(token))) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
-        const messages = JSON.parse(fs.readFileSync(CHAT_FILE, 'utf8'));
+        const messages = readMessages();
         const messageId = parseInt(req.params.id);
-        const authorId = req.query.authorId;
-        
         const messageIndex = messages.findIndex(m => m.id === messageId);
+        
         if (messageIndex === -1) {
             return res.status(404).json({ error: 'Message not found' });
         }
         
-        if (messages[messageIndex].authorId !== authorId) {
+        if (messages[messageIndex].authorId !== req.query.authorId) {
             return res.status(403).json({ error: 'Not authorized to delete this message' });
         }
         
         const deletedMessage = messages.splice(messageIndex, 1)[0];
-        fs.writeFileSync(CHAT_FILE, JSON.stringify(messages, null, 2));
+        writeMessages(messages);
         res.json(deletedMessage);
     } catch (error) {
         console.error('Error deleting message:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Failed to delete message' });
+    }
+});
+
+app.post('/api/chat/:id/reactions', authMiddleware, (req, res) => {
+    try {
+        const messages = readMessages();
+        const messageId = parseInt(req.params.id);
+        const messageIndex = messages.findIndex(m => m.id === messageId);
+        
+        if (messageIndex === -1) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+        
+        const reaction = req.body;
+        const existingReactionIndex = messages[messageIndex].reactions.findIndex(r =>
+            r.emoji === reaction.emoji && r.userId === reaction.userId
+        );
+        
+        if (existingReactionIndex !== -1) {
+            messages[messageIndex].reactions.splice(existingReactionIndex, 1);
+        } else {
+            messages[messageIndex].reactions.push(reaction);
+        }
+        
+        writeMessages(messages);
+        res.json({ reactions: messages[messageIndex].reactions });
+    } catch (error) {
+        console.error('Error updating reactions:', error);
+        res.status(500).json({ error: 'Failed to update reactions' });
     }
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 }); 

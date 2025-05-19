@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         hrClearBtn.addEventListener('click', () => {
             if (confirm('Are you sure you want to clear all messages? This action cannot be undone.')) {
-                fetch('/api/chat/messages', {
+                fetch('/.netlify/functions/chat', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (editingMessageId) {
             // Edit existing message
-            fetch(`/.netlify/functions/chat/${editingMessageId}`, {
+            fetch('/.netlify/functions/chat/' + editingMessageId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const token = localStorage.getItem('discord_token');
-        fetch(`/.netlify/functions/chat/${id}`, {
+        fetch('/.netlify/functions/chat/' + id, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Are you sure you want to delete this message?')) return;
         
         const token = localStorage.getItem('discord_token');
-        fetch(`/.netlify/functions/chat/${id}?authorId=${userData.id}`, {
+        fetch('/.netlify/functions/chat/' + id + '?authorId=' + userData.id, {
             method: 'DELETE',
             headers: {
                 'Authorization': token
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMessageReactions(messageId, updatedReactions);
         
         // Make API call
-        fetch(`/.netlify/functions/chat/${messageId}/reactions`, {
+        fetch('/.netlify/functions/chat/' + messageId + '/reactions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -842,7 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await registerActiveUser();
                 
                 // Then fetch all active users
-                const response = await fetch('/api/chat/active');
+                const response = await fetch('/.netlify/functions/chat/active');
                 if (!response.ok) {
                     throw new Error('Failed to fetch active users');
                 }
@@ -879,7 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Register current user as active
     async function registerActiveUser() {
         try {
-            const response = await fetch('/api/chat/active', {
+            const response = await fetch('/.netlify/functions/chat/active', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -915,7 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchActiveOfficers();
     
     // Set up event source for real-time updates
-    const eventSource = new EventSource('/api/notifications/stream');
+    const eventSource = new EventSource('/.netlify/functions/notifications/stream');
     
     eventSource.onmessage = function(event) {
         try {
@@ -986,7 +986,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Send heartbeat to keep user active
     async function sendHeartbeat() {
         try {
-            await fetch(`/api/chat/active/${userData.id}`, { method: 'PUT' });
+            await fetch('/.netlify/functions/chat/active/' + userData.id, { method: 'PUT' });
         } catch (error) {
             console.error('Error sending heartbeat:', error);
         }
@@ -997,7 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Make a synchronous request to remove user on page close
             const xhr = new XMLHttpRequest();
-            xhr.open('DELETE', `/api/chat/active/${userData.id}`, false);
+            xhr.open('DELETE', '/.netlify/functions/chat/active/' + userData.id, false);
             xhr.send();
         } catch (e) {
             console.error('Error removing user on page close:', e);
