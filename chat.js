@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalBtnHtml = sendBtn.innerHTML;
         sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         
-        // Early optimistic UI update for better perceived performance
+        // Early optimistic UI update
         const tempMessage = {
             id: `temp-${Date.now()}`,
             author: userData.username,
@@ -270,22 +270,23 @@ document.addEventListener('DOMContentLoaded', () => {
             timestamp: Date.now(),
             reactions: [],
             edited: false,
-            isTemp: true // Mark as temporary for later replacement
+            isTemp: true
         };
         
         // Add to UI immediately
         messages.push(tempMessage);
         appendMessage(tempMessage);
-        
-        // Scroll to bottom
         messageContainer.scrollTop = messageContainer.scrollHeight;
+        
+        const token = localStorage.getItem('discord_token');
         
         if (editingMessageId) {
             // Edit existing message
-            fetch(`/api/chat/messages/${editingMessageId}`, {
+            fetch(`/.netlify/functions/chat/${editingMessageId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify({
                     text: text,
@@ -293,40 +294,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to edit message');
-                }
+                if (!response.ok) throw new Error('Failed to edit message');
                 return response.json();
             })
             .then(() => {
                 editingMessageId = null;
-                
-                // Server will notify via SSE, but we restore UI now
                 chatInput.disabled = false;
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalBtnHtml;
-                
-                // Remove temporary message
                 removeMessageById(tempMessage.id);
+                loadMessages(); // Refresh messages
             })
             .catch(error => {
                 console.error('Error editing message:', error);
                 showToast('Failed to edit message', true);
-                
-                // Restore UI
                 chatInput.disabled = false;
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalBtnHtml;
-                
-                // Remove temporary message
                 removeMessageById(tempMessage.id);
             });
         } else {
             // Create new message
-            fetch('/api/chat/messages', {
+            fetch('/.netlify/functions/chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify({
                     author: userData.username,
@@ -338,30 +331,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to send message');
-                }
+                if (!response.ok) throw new Error('Failed to send message');
                 return response.json();
             })
-            .then(newMessage => {
-                // Restore UI
+            .then(() => {
                 chatInput.disabled = false;
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalBtnHtml;
-                
-                // Remove temporary message and let the SSE handle adding the real one
                 removeMessageById(tempMessage.id);
+                loadMessages(); // Refresh messages
             })
             .catch(error => {
                 console.error('Error sending message:', error);
                 showToast('Failed to send message', true);
-                
-                // Restore UI
                 chatInput.disabled = false;
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalBtnHtml;
-                
-                // Update temporary message to show it's offline
                 const tempMessageEl = document.querySelector(`.message[data-id="${tempMessage.id}"]`);
                 if (tempMessageEl) {
                     const textEl = tempMessageEl.querySelector('.message-text p');
@@ -372,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Clear input
         chatInput.value = '';
     }
     
@@ -417,10 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        fetch(`/api/chat/messages/${id}`, {
+        const token = localStorage.getItem('discord_token');
+        fetch(`/.netlify/functions/chat/${id}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': token
             },
             body: JSON.stringify({
                 text: newText,
@@ -443,15 +429,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delete message function
     function deleteMessage(id) {
         if (confirm('Are you sure you want to delete this message?')) {
-            fetch(`/api/chat/messages/${id}?authorId=${userData.id}`, {
-                method: 'DELETE'
+            const token = localStorage.getItem('discord_token');
+            fetch(`/.netlify/functions/chat/${id}?authorId=${userData.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': token
+                }
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to delete message');
-                }
-                
-                // Server will notify all clients via SSE
+                if (!response.ok) throw new Error('Failed to delete message');
+                return response.json();
+            })
+            .then(() => {
+                removeMessageById(id);
+                showToast('Message deleted');
             })
             .catch(error => {
                 console.error('Error deleting message:', error);
@@ -503,10 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Make API call
-        fetch(`/api/chat/messages/${messageId}/reactions`, {
+        const token = localStorage.getItem('discord_token');
+        fetch(`/.netlify/functions/chat/${messageId}/reactions`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': token
             },
             body: JSON.stringify({
                 emoji: emoji,
@@ -771,24 +764,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load messages from localStorage
     function loadMessages() {
-        // Fetch messages from server
-        fetch('/api/chat/messages')
-            .then(response => response.json())
-            .then(serverMessages => {
-                messages = serverMessages;
-                renderMessages();
-                console.log("Loaded messages from server:", messages.length);
-            })
-            .catch(error => {
-                console.error('Error loading messages:', error);
-                
-                // Fallback to localStorage if server fails
-                const saved = localStorage.getItem('chat_messages');
-                if (saved) {
-                    messages = JSON.parse(saved);
-                    renderMessages();
-                }
-            });
+        const token = localStorage.getItem('discord_token');
+        fetch('/.netlify/functions/chat', {
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load messages');
+            return response.json();
+        })
+        .then(data => {
+            messages = data;
+            renderMessages();
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+            showToast('Failed to load messages', true);
+        });
     }
     
     // Render officers in sidebar

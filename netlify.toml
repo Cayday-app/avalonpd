@@ -1,5 +1,6 @@
 [build]
   publish = "/"
+  functions = "netlify/functions"
   command = "echo 'No build command needed'"
 
 [build.processing]
@@ -7,6 +8,9 @@
 
 [build.environment]
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
+[functions]
+  node_bundler = "esbuild"
   
 [[redirects]]
   from = "/*"

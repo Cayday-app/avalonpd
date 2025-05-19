@@ -8,7 +8,8 @@
   "dependencies": {
     "express": "^4.18.2",
     "express-session": "^1.18.1",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "cors": "^2.8.5"
   },
   "description": "APD Portal with Discord Authentication",
   "main": "server.js",
