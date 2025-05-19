@@ -2,10 +2,10 @@
   publish = "."
   functions = ".netlify/functions"
   command = "cd .netlify/functions && npm install"
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ."
 
-# Explicitly disable all plugins
-[plugins]
+[build.environment]
+  NODE_VERSION = "16"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
 [[redirects]]
   from = "/*"
@@ -14,7 +14,7 @@
 
 [[headers]]
   for = "/.netlify/functions/*"
-    [headers.values]
+  [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
@@ -26,7 +26,4 @@
   framework = "#static"
   port = 8888
 
-[build.environment]
-  NETLIFY_USE_YARN = "false"
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
-  NODE_VERSION = "16" 
+# Explicitly disable all plugins 
