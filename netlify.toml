@@ -1,6 +1,7 @@
 [build]
   functions = "netlify/functions"
   publish = "."
+  command = ""
 
 [[redirects]]
   from = "/*"
@@ -12,6 +13,7 @@
   external_node_modules = ["node-fetch"]
 
 [dev]
+  framework = "#static"
   functions = "netlify/functions"
   publish = "."
   port = 8888
