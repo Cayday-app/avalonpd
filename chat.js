@@ -843,73 +843,82 @@ document.addEventListener('DOMContentLoaded', () => {
         officers = JSON.parse(savedOfficers);
     }
     
+    // Set up event source for real-time updates
+    let eventSource = null;
+
+    function initializeEventSource() {
+        if (eventSource) {
+            eventSource.close();
+        }
+
+        eventSource = new EventSource('/.netlify/functions/notifications', { withCredentials: false });
+        
+        eventSource.onopen = function() {
+            console.log('SSE connection established');
+        };
+        
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('SSE message:', data);
+                
+                // Handle different notification types
+                switch (data.type) {
+                    case 'new-message':
+                        if (!messages.some(m => m.id === data.message.id)) {
+                            messages.push(data.message);
+                            appendMessage(data.message);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                        }
+                        break;
+                        
+                    case 'edit-message':
+                        const editIndex = messages.findIndex(m => m.id === data.message.id);
+                        if (editIndex !== -1) {
+                            messages[editIndex] = data.message;
+                            renderMessages();
+                        }
+                        break;
+                        
+                    case 'delete-message':
+                        removeMessageById(data.messageId);
+                        break;
+                        
+                    case 'reaction-change':
+                        updateMessageReactions(data.messageId, data.reactions);
+                        break;
+                        
+                    case 'user-active':
+                    case 'user-inactive':
+                        fetchActiveOfficers();
+                        break;
+                        
+                    case 'clear-chat':
+                        messages = [];
+                        renderMessages();
+                        showToast('Chat has been cleared');
+                        break;
+                }
+            } catch (error) {
+                console.error('Error processing SSE event:', error);
+            }
+        };
+        
+        eventSource.onerror = function(error) {
+            console.error('EventSource error:', error);
+            eventSource.close();
+            
+            // Attempt to reconnect after 5 seconds
+            setTimeout(initializeEventSource, 5000);
+        };
+    }
+    
     // Initialize chat
     loadEmojiPicker();
     loadMessages();
     loadOfficers();
     fetchActiveOfficers();
-    
-    // Set up event source for real-time updates
-    const eventSource = new EventSource('/.netlify/functions/notifications');
-    
-    eventSource.onmessage = function(event) {
-        try {
-            const data = JSON.parse(event.data);
-            console.log('SSE message:', data);
-            
-            // Handle different notification types
-            if (data.type === 'new-message') {
-                // Check if we already have this message (to avoid duplicates)
-                if (!messages.some(m => m.id === data.message.id)) {
-                    // Add new message to chat
-                    messages.push(data.message);
-                    appendMessage(data.message);
-                    // Auto-scroll to bottom for new messages
-                    messageContainer.scrollTop = messageContainer.scrollHeight;
-                }
-            } 
-            else if (data.type === 'edit-message') {
-                // Update edited message
-                const messageIndex = messages.findIndex(m => m.id === data.message.id);
-                if (messageIndex !== -1) {
-                    messages[messageIndex] = data.message;
-                    renderMessages(); // Re-render all messages (could optimize to just update this one)
-                }
-            }
-            else if (data.type === 'delete-message') {
-                // Remove deleted message
-                messages = messages.filter(m => m.id !== data.messageId);
-                
-                // Remove from DOM directly instead of re-rendering
-                const messageEl = document.querySelector(`.message[data-id="${data.messageId}"]`);
-                if (messageEl) {
-                    messageEl.remove();
-                } else {
-                    renderMessages(); // Fallback to full render if element not found
-                }
-            }
-            else if (data.type === 'reaction-change') {
-                // Update reactions without re-rendering whole message list
-                updateMessageReactions(data.messageId, data.reactions);
-            }
-            else if (data.type === 'user-active' || data.type === 'user-inactive') {
-                // User presence updates are handled by fetchActiveOfficers
-                fetchActiveOfficers();
-            }
-            else if (data.type === 'clear-chat') {
-                // Clear all messages from the chat
-                messages = [];
-                renderMessages();
-                showToast('Chat has been cleared automatically');
-            }
-        } catch (error) {
-            console.error('Error processing SSE event:', error);
-        }
-    };
-    
-    eventSource.onerror = function(err) {
-        console.error('EventSource error:', err);
-    };
+    initializeEventSource();
     
     // Periodically check for active officers
     setInterval(() => {
