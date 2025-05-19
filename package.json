@@ -2,6 +2,10 @@
   "name": "apd-chat",
   "version": "1.0.0",
   "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "dev": "netlify dev",
     "build": "cd .netlify/functions && npm install"
