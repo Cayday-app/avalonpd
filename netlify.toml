@@ -1,22 +1,23 @@
 [build]
-  publish = "."
   functions = "netlify/functions"
-  command = "echo 'No build command needed'"
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["node-fetch"]
+
+[dev]
+  functions = "netlify/functions"
+  publish = "."
+  port = 8888
 
 [build.processing]
   skip_processing = true
 
 [build.environment]
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["node-fetch", "fs", "path"]
-
-[kv]
-  chat = "chat_messages"
-  
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200 
+  NETLIFY_NEXT_PLUGIN_SKIP = "true" 

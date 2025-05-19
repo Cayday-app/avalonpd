@@ -247,14 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load messages from server
     function loadMessages() {
-        const token = localStorage.getItem('discord_token');
         fetch('/.netlify/functions/chat', {
             headers: {
-                'Authorization': token
+                'Authorization': localStorage.getItem('discord_token')
             }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Failed to load messages');
+            if (!response.ok) {
+                throw new Error('Failed to load messages');
+            }
             return response.json();
         })
         .then(data => {
@@ -269,119 +270,39 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Send message function with optimizations
     function sendMessage() {
-        const text = chatInput.value.trim();
-        if (!text) return;
-        
-        // Disable input during sending
-        chatInput.disabled = true;
-        sendBtn.disabled = true;
-        
-        // Show sending indicator
-        const originalBtnHtml = sendBtn.innerHTML;
-        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        
-        // Early optimistic UI update
-        const tempMessage = {
-            id: `temp-${Date.now()}`,
-            author: userData.username,
+        if (!chatInput.value.trim()) return;
+
+        const messageData = {
+            text: chatInput.value,
             authorId: userData.id,
-            avatar: userData.avatar 
-                ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
-                : 'https://cdn.discordapp.com/embed/avatars/0.png',
-            text: text,
-            timestamp: Date.now(),
-            reactions: [],
-            edited: false,
-            isTemp: true
+            authorName: userData.username,
+            authorAvatar: userData.avatar
         };
-        
-        // Add to UI immediately
-        messages.push(tempMessage);
-        appendMessage(tempMessage);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-        
-        const token = localStorage.getItem('discord_token');
-        
-        if (editingMessageId) {
-            // Edit existing message
-            fetch('/.netlify/functions/chat/' + editingMessageId, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token
-                },
-                body: JSON.stringify({
-                    text: text,
-                    authorId: userData.id
-                })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to edit message');
-                return response.json();
-            })
-            .then(updatedMessage => {
-                editingMessageId = null;
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = originalBtnHtml;
-                removeMessageById(tempMessage.id);
-                
-                // Update the message in our local array
-                const messageIndex = messages.findIndex(m => m.id === updatedMessage.id);
-                if (messageIndex !== -1) {
-                    messages[messageIndex] = updatedMessage;
-                }
-                renderMessages();
-            })
-            .catch(error => {
-                console.error('Error editing message:', error);
-                showToast('Failed to edit message', true);
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = originalBtnHtml;
-                removeMessageById(tempMessage.id);
-            });
-        } else {
-            // Send new message
-            fetch('/.netlify/functions/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token
-                },
-                body: JSON.stringify({
-                    author: userData.username,
-                    authorId: userData.id,
-                    avatar: userData.avatar 
-                        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
-                        : 'https://cdn.discordapp.com/embed/avatars/0.png',
-                    text: text
-                })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to send message');
-                return response.json();
-            })
-            .then(newMessage => {
-                chatInput.value = '';
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = originalBtnHtml;
-                removeMessageById(tempMessage.id);
-                
-                // Add the new message to our local array
-                messages.push(newMessage);
-                renderMessages();
-            })
-            .catch(error => {
-                console.error('Error sending message:', error);
-                showToast('Failed to send message', true);
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = originalBtnHtml;
-                removeMessageById(tempMessage.id);
-            });
-        }
+
+        fetch('/.netlify/functions/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('discord_token')
+            },
+            body: JSON.stringify(messageData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to send message');
+            }
+            return response.json();
+        })
+        .then(newMessage => {
+            messages.push(newMessage);
+            renderMessages();
+            chatInput.value = '';
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            showToast('Failed to send message', true);
+        });
     }
     
     // Listen for send button click
@@ -412,27 +333,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Edit message function
     function editMessage(id, newText) {
-        // First check if user is authorized to edit this message
-        const message = messages.find(m => m.id === id);
-        
-        if (!message) {
-            showToast('Message not found', true);
-            return;
-        }
-        
-        if (message.authorId !== userData.id) {
-            showToast('You can only edit your own messages', true);
-            return;
-        }
-        
-        const token = localStorage.getItem('discord_token');
-        fetch('/.netlify/functions/chat/' + id, {
+        fetch('/.netlify/functions/chat', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token
+                'Authorization': localStorage.getItem('discord_token')
             },
             body: JSON.stringify({
+                id: id,
                 text: newText,
                 authorId: userData.id
             })
@@ -441,8 +349,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error('Failed to edit message');
             }
-            
-            // Server will notify all clients via SSE
+            return response.json();
+        })
+        .then(updatedMessage => {
+            const index = messages.findIndex(m => m.id === id);
+            if (index !== -1) {
+                messages[index] = updatedMessage;
+                renderMessages();
+            }
+            editingMessageId = null;
         })
         .catch(error => {
             console.error('Error editing message:', error);
@@ -452,22 +367,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Delete message function
     function deleteMessage(id) {
-        if (!confirm('Are you sure you want to delete this message?')) return;
-        
-        const token = localStorage.getItem('discord_token');
-        fetch('/.netlify/functions/chat/' + id + '?authorId=' + userData.id, {
+        fetch(`/.netlify/functions/chat?id=${id}&authorId=${userData.id}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': token
+                'Authorization': localStorage.getItem('discord_token')
             }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Failed to delete message');
+            if (!response.ok) {
+                throw new Error('Failed to delete message');
+            }
             return response.json();
         })
         .then(deletedMessage => {
-            removeMessageById(deletedMessage.id);
-            showToast('Message deleted');
+            const index = messages.findIndex(m => m.id === id);
+            if (index !== -1) {
+                messages.splice(index, 1);
+                renderMessages();
+            }
         })
         .catch(error => {
             console.error('Error deleting message:', error);
