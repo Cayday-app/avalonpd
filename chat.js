@@ -796,7 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Register current user as active
     async function registerActiveUser() {
         try {
-            const response = await fetch('/.netlify/functions/chat/active', {
+            const response = await fetch('/.netlify/functions/discord-status', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -903,7 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Send heartbeat to keep user active
     async function sendHeartbeat() {
         try {
-            await fetch('/.netlify/functions/chat/active/' + userData.id, { method: 'PUT' });
+            await fetch('/.netlify/functions/discord-status/' + userData.id, { method: 'PUT' });
         } catch (error) {
             console.error('Error sending heartbeat:', error);
         }
@@ -914,7 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Make a synchronous request to remove user on page close
             const xhr = new XMLHttpRequest();
-            xhr.open('DELETE', '/.netlify/functions/chat/active/' + userData.id, false);
+            xhr.open('DELETE', '/.netlify/functions/discord-status/' + userData.id, false);
             xhr.send();
         } catch (e) {
             console.error('Error removing user on page close:', e);

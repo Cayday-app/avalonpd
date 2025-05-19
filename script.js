@@ -755,7 +755,7 @@ function createUpdateBubble(update) {
 // Connect to Server-Sent Events for real-time notifications
 function connectToNotificationStream() {
     try {
-        const eventSource = new EventSource('/api/notifications/stream');
+        const eventSource = new EventSource('/.netlify/functions/notifications');
         
         eventSource.onmessage = function(event) {
             const data = JSON.parse(event.data);
