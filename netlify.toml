@@ -1,7 +1,7 @@
 [build]
-  functions = ".netlify/functions"
   publish = "."
-  command = "npm install && cd .netlify/functions && npm install"
+  functions = ".netlify/functions"
+  command = "npm install"
 
 [[redirects]]
   from = "/*"
@@ -17,17 +17,7 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["node-fetch"]
 
 [dev]
   framework = "#static"
-  functions = ".netlify/functions"
-  publish = "."
-  port = 8888
-
-[build.processing]
-  skip_processing = true
-
-[build.environment]
-  NODE_VERSION = "16"
-  NPM_VERSION = "8" 
+  port = 8888 

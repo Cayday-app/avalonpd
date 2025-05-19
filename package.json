@@ -6,10 +6,7 @@
     "dev": "netlify dev",
     "build": "cd .netlify/functions && npm install"
   },
-  "dependencies": {
-    "node-fetch": "2.6.7"
-  },
-  "description": "APD Chat Application",
+  "dependencies": {},
   "devDependencies": {
     "netlify-cli": "^21.4.2"
   }
