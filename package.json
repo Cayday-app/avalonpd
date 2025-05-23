@@ -8,9 +8,13 @@
   },
   "scripts": {
     "dev": "netlify dev",
-    "build": "cd functions && npm install"
+    "build": "npm install && cd functions && npm install",
+    "postinstall": "cd functions && npm install"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@netlify/functions": "^2.0.0",
+    "netlify-cli": "^21.4.2"
+  },
   "devDependencies": {
     "netlify-cli": "^21.4.2"
   }
