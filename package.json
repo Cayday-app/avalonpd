@@ -4,11 +4,11 @@
   "private": true,
   "type": "commonjs",
   "engines": {
-    "node": "16.x"
+    "node": ">=18"
   },
   "scripts": {
     "dev": "netlify dev",
-    "build": "cd .netlify/functions && npm install"
+    "build": "cd functions && npm install"
   },
   "dependencies": {},
   "devDependencies": {
