@@ -9,6 +9,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
 body {
@@ -66,12 +67,13 @@ nav a:hover {
 nav a::after {
     content: '';
     position: absolute;
+    bottom: 0;
+    left: 50%;
     width: 0;
     height: 2px;
-    bottom: -4px;
-    left: 0;
-    background-color: var(--accent);
-    transition: width 0.3s ease;
+    background: var(--accent);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
 }
 
 nav a:hover::after {
@@ -87,11 +89,33 @@ nav a:hover::after {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    transform-origin: center;
 }
 
 .login-btn:hover {
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.login-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+}
+
+.login-btn:hover::before {
+    width: 300%;
+    height: 300%;
 }
 
 .hero {
@@ -108,6 +132,7 @@ nav a:hover::after {
     background-position: center;
     background-attachment: fixed;
     margin-bottom: 50px;
+    animation: fadeIn 1s ease-out;
 }
 
 .hero h1 {
@@ -115,11 +140,18 @@ nav a:hover::after {
     font-weight: 800;
     margin-bottom: 1rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: slideInDown 1s ease-out;
 }
 
 .hero img {
     max-width: 100%;
     height: auto;
+}
+
+.hero p {
+    animation: slideInUp 0.8s ease-out 0.2s;
+    opacity: 0;
+    animation-fill-mode: forwards;
 }
 
 /* Page content styles */
@@ -208,15 +240,15 @@ ul {
     border-radius: 10px;
     padding: 2rem;
     text-align: center;
-    transition: transform 0.3s, box-shadow 0.4s ease;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .team-member:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .team-member img {
@@ -225,11 +257,11 @@ ul {
     border-radius: 50%;
     margin-bottom: 1.5rem;
     border: 4px solid var(--accent);
-    transition: transform 0.4s ease;
+    transition: all 0.3s ease;
 }
 
 .team-member:hover img {
-    transform: scale(1.05) rotate(5deg);
+    transform: scale(1.05);
 }
 
 .team-member::after {
@@ -304,12 +336,36 @@ ul {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .join-button:hover {
     animation: none;
-    transform: scale(1.05);
-    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(var(--accent-rgb), 0.4);
+}
+
+.join-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
+}
+
+.join-button:hover::after {
+    left: 100%;
 }
 
 /* Updates Section */
@@ -338,14 +394,15 @@ ul {
     background: var(--primary);
     border-radius: 20px;
     padding: 1.5rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    animation: slideInUp 0.5s ease-out;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     position: relative;
 }
 
 .update-bubble:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .update-header {
@@ -431,11 +488,20 @@ ul {
     border: 8px solid var(--accent);
     border-top-color: transparent;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite, pulseSize 2s ease-in-out infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+@keyframes pulseSize {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 /* Redirect Page Styles */
@@ -491,6 +557,13 @@ ul {
     border-radius: 6px;
     background: var(--primary);
     color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.create-update-container input:focus,
+.create-update-container textarea:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), 0.1);
 }
 
 .create-update-container button {
@@ -501,11 +574,12 @@ ul {
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
 }
 
 .create-update-container button:hover {
-    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), 0.3);
 }
 
 /* Hide Create Update unless privileged */
@@ -575,6 +649,7 @@ footer {
     backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.3s ease-out;
 }
 .theme-modal-content {
     background: var(--background);
@@ -587,6 +662,7 @@ footer {
     flex-direction: column;
     gap: 1.5rem;
     position: relative;
+    animation: slideInUp 0.3s ease-out;
 }
 .theme-modal-content h2 {
     font-size: 1.5rem;
@@ -654,7 +730,7 @@ footer {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s ease;
 }
 #apply-theme-btn:hover {
     background: #2980b9;
@@ -787,9 +863,9 @@ footer {
 .updates-bubble-container {
     max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+    display: grid;
+    gap: 20px;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .update-bubble-row {
@@ -1461,4 +1537,94 @@ footer {
 
 .toast.error {
     background: #dc3545;
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+    }
+    
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+    }
+    
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+    }
+}
+
+@keyframes pulseSize {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Updates section animations */
+.updates-bubble-container {
+    display: grid;
+    gap: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.update-bubble {
+    transition: all 0.3s ease;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.update-bubble:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Debug panel animations */
+#debug-panel {
+    transition: all 0.3s ease;
+    animation: slideInUp 0.3s ease-out;
+}
+
+#debug-panel button {
+    transition: all 0.2s ease;
+}
+
+#debug-panel button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 } 
