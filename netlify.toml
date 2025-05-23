@@ -1,7 +1,7 @@
 [build]
   publish = "."
   functions = "functions"
-  command = "cd functions && npm install"
+  command = "npm install && cd functions && npm install"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -21,6 +21,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["discord.js"]
 
 [dev]
   framework = "#static"
