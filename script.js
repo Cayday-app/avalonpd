@@ -820,3 +820,97 @@ function initializeTheme() {
     const theme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
 }
+
+// Enhanced scroll animations with Intersection Observer
+const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            // Optional: unobserve after animation
+            // scrollObserver.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -10% 0px'
+});
+
+// Observe all sections and cards
+document.querySelectorAll('.section, .card, .update-bubble').forEach((element) => {
+    element.classList.add('animate-ready');
+    scrollObserver.observe(element);
+});
+
+// Smooth scroll behavior
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Add parallax effect to hero section
+const hero = document.querySelector('.hero');
+if (hero) {
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        hero.style.backgroundPositionY = `${scrolled * 0.5}px`;
+    });
+}
+
+// Add hover effect to join button
+const joinButton = document.querySelector('.join-button');
+if (joinButton) {
+    joinButton.addEventListener('mousemove', (e) => {
+        const rect = joinButton.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        joinButton.style.setProperty('--x', `${x}px`);
+        joinButton.style.setProperty('--y', `${y}px`);
+    });
+}
+
+// Add CSS for new animations
+const style = document.createElement('style');
+style.textContent = `
+    .animate-ready {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .animate-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .join-button {
+        --x: 0px;
+        --y: 0px;
+    }
+    
+    .join-button::after {
+        content: '';
+        position: absolute;
+        top: var(--y);
+        left: var(--x);
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .join-button:hover::after {
+        opacity: 1;
+    }
+`;
+document.head.appendChild(style);

@@ -127,12 +127,12 @@ nav a:hover::after {
     text-align: center;
     position: relative;
     padding: 0 20px;
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('police_lineup.jpg');
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('police_lineup.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     margin-bottom: 50px;
-    animation: fadeIn 1s ease-out;
+    animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero h1 {
@@ -140,7 +140,24 @@ nav a:hover::after {
     font-weight: 800;
     margin-bottom: 1rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    animation: slideInDown 1s ease-out;
+    animation: slideInDown 1s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(45deg, #ffffff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientFlow 8s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .hero img {
@@ -149,9 +166,12 @@ nav a:hover::after {
 }
 
 .hero p {
-    animation: slideInUp 0.8s ease-out 0.2s;
+    animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
     opacity: 0;
     animation-fill-mode: forwards;
+    max-width: 600px;
+    line-height: 1.6;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Page content styles */
@@ -324,47 +344,46 @@ ul {
 }
 
 .join-button {
-    background: var(--accent);
+    background: linear-gradient(45deg, var(--accent), #2980b9);
     color: var(--text);
     border: none;
     padding: 20px 40px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 1.4rem;
     font-weight: 700;
     cursor: pointer;
-    animation: pulse 2s infinite;
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
 }
 
 .join-button:hover {
-    animation: none;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(var(--accent-rgb), 0.4);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(45deg, #2980b9, var(--accent));
 }
 
-.join-button::after {
+.join-button::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(
-        45deg,
+        90deg,
         transparent,
-        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.2),
         transparent
     );
-    transform: rotate(45deg);
-    transition: all 0.5s ease;
+    transition: 0.5s;
 }
 
-.join-button:hover::after {
+.join-button:hover::before {
     left: 100%;
 }
 
@@ -762,23 +781,25 @@ footer {
     right: 30px;
     width: 300px;
     background: var(--primary);
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     z-index: 9999;
     opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s ease;
+    transform: translateX(100%) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .update-toast.show {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
 }
 
 .update-toast-header {
-    background: var(--accent);
-    padding: 10px 15px;
+    background: linear-gradient(45deg, var(--accent), #2980b9);
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -792,6 +813,11 @@ footer {
 .close-toast {
     cursor: pointer;
     font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.close-toast:hover {
+    transform: rotate(90deg);
 }
 
 .update-toast-body {
@@ -828,20 +854,23 @@ footer {
     background: rgba(52, 152, 219, 0.2);
     color: var(--text);
     border: none;
-    border-radius: 4px;
-    padding: 6px 10px;
-    margin: 0 15px 10px;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin: 10px 15px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 8px;
+    backdrop-filter: blur(5px);
 }
 
 .play-sound-btn:hover {
     background: rgba(52, 152, 219, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
 }
 
 /* Recent Updates Section - Chat Bubble Style */
