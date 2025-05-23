@@ -72,7 +72,7 @@
         try {
             const token = localStorage.getItem('discord_token');
             console.log('Submitting announcement', data, token);
-            const res = await fetch('/.netlify/functions/updates', {
+            const res = await fetch('/.netlify/functions/updates.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
