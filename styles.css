@@ -3,6 +3,8 @@
     --accent: #3498db;
     --text: #ffffff;
     --background: #0f0f0f;
+    --red-light: #ff3b3b;
+    --blue-light: #3b82f6;
 }
 
 * {
@@ -21,7 +23,7 @@ body {
 }
 
 nav {
-    background: rgba(26, 26, 26, 0.8);
+    background: rgba(26, 26, 26, 0.95);
     backdrop-filter: blur(10px);
     padding: 0;
     height: 60px;
@@ -31,6 +33,7 @@ nav {
     width: 100%;
     top: 0;
     z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 nav .nav-container {
@@ -52,16 +55,17 @@ nav a {
     color: var(--text);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s, transform 0.2s;
-    padding: 0 5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px 16px;
+    border-radius: 8px;
     position: relative;
-    white-space: nowrap;
-    font-size: 14px;
+    overflow: hidden;
 }
 
 nav a:hover {
     color: var(--accent);
-    transform: scale(1.1);
+    background: rgba(52, 152, 219, 0.1);
+    transform: translateY(-2px);
 }
 
 nav a::after {
@@ -72,50 +76,50 @@ nav a::after {
     width: 0;
     height: 2px;
     background: var(--accent);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateX(-50%);
 }
 
 nav a:hover::after {
-    width: 100%;
+    width: 80%;
 }
 
 .login-btn {
-    margin-left: auto;
-    background: var(--accent);
+    background: linear-gradient(45deg, var(--accent), #2980b9);
     color: var(--text);
     border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    transform-origin: center;
 }
 
 .login-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
 }
 
 .login-btn::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: all 0.5s ease;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
 }
 
 .login-btn:hover::before {
-    width: 300%;
-    height: 300%;
+    left: 100%;
 }
 
 .hero {
@@ -132,32 +136,23 @@ nav a:hover::after {
     background-position: center;
     background-attachment: fixed;
     margin-bottom: 50px;
-    animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero h1 {
     font-size: 4rem;
     font-weight: 800;
     margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    animation: slideInDown 1s cubic-bezier(0.4, 0, 0.2, 1);
     background: linear-gradient(45deg, #ffffff, var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-size: 200% 200%;
+    text-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
     animation: gradientFlow 8s ease infinite;
 }
 
 @keyframes gradientFlow {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .hero img {
@@ -166,9 +161,9 @@ nav a:hover::after {
 }
 
 .hero p {
-    animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
-    opacity: 0;
-    animation-fill-mode: forwards;
+    color: var(--text);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
     max-width: 600px;
     line-height: 1.6;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
@@ -358,7 +353,6 @@ ul {
     position: relative;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
 }
 
 .join-button:hover {
@@ -494,33 +488,66 @@ ul {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2000;
 }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 8px solid var(--accent);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite, pulseSize 2s ease-in-out infinite;
+.loading-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.police-lights {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-@keyframes pulseSize {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
+.police-lights::before,
+.police-lights::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    animation: lightFlash 1.5s infinite;
+}
+
+.police-lights::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--red-light) 0%, transparent 100%);
+    animation-delay: 0s;
+}
+
+.police-lights::after {
+    right: 0;
+    background: linear-gradient(-90deg, var(--blue-light) 0%, transparent 100%);
+    animation-delay: 0.75s;
+}
+
+@keyframes lightFlash {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+.loading-logo {
+    width: 200px;
+    height: auto;
+    animation: logoPulse 2s infinite;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+}
+
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
 }
 
 /* Redirect Page Styles */

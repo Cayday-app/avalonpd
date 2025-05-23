@@ -914,3 +914,85 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Function to create a new update
+async function createUpdate(updateData) {
+    try {
+        const response = await fetch('/.netlify/functions/updates', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Error creating update:', error);
+        throw error;
+    }
+}
+
+// Function to fetch updates
+async function fetchUpdates() {
+    try {
+        const response = await fetch('/.netlify/functions/updates');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const updates = await response.json();
+        return updates;
+    } catch (error) {
+        console.error('Error fetching updates:', error);
+        throw error;
+    }
+}
+
+// Update the form submission handler
+document.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const updateData = {
+        title: formData.get('title'),
+        content: formData.get('content'),
+        creatorUsername: formData.get('creatorUsername'),
+        creatorAvatar: formData.get('creatorAvatar')
+    };
+
+    try {
+        await createUpdate(updateData);
+        // Show success message
+        showToast('Update created successfully!', 'success');
+        // Reset form
+        e.target.reset();
+    } catch (error) {
+        // Show error message
+        showToast('Failed to create update. Please try again.', 'error');
+    }
+});
+
+// Function to show toast messages
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Add show class after a small delay
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
