@@ -4,7 +4,7 @@
     --text: #ffffff;
     --background: #0f0f0f;
     --red-light: #ff3b3b;
-    --blue-light: #3b82f6;
+    --blue-light: #4d94ff;
 }
 
 * {
@@ -352,33 +352,23 @@ ul {
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    outline: none;
 }
 
 .join-button:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
     background: linear-gradient(45deg, #2980b9, var(--accent));
 }
 
-.join-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-    );
-    transition: 0.5s;
+.join-button:focus {
+    outline: 2px solid var(--accent);
 }
 
-.join-button:hover::before {
-    left: 100%;
+.join-button::before, .join-button::after {
+    display: none !important;
 }
 
 /* Updates Section */
@@ -481,24 +471,25 @@ ul {
     display: none;
 }
 
-/* Loading Overlay */
+/* Loading Overlay and Police Lights */
 #loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
+    width: 100vw;
+    height: 100vh;
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    overflow: hidden;
 }
 
 .loading-container {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -506,48 +497,66 @@ ul {
 
 .police-lights {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
 }
 
-.police-lights::before,
-.police-lights::after {
-    content: '';
+.police-light {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    animation: lightFlash 1.5s infinite;
+    top: 50%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    filter: blur(80px) brightness(1.5) saturate(2);
+    opacity: 0.8;
+    mix-blend-mode: screen;
+    transform: translateY(-50%);
+    animation: policeChaseFlash 0.8s infinite alternate;
 }
 
-.police-lights::before {
-    left: 0;
-    background: linear-gradient(90deg, var(--red-light) 0%, transparent 100%);
+.police-light.red {
+    left: -200px;
+    background: radial-gradient(circle, var(--red-light) 30%, transparent 80%);
     animation-delay: 0s;
 }
 
-.police-lights::after {
-    right: 0;
-    background: linear-gradient(-90deg, var(--blue-light) 0%, transparent 100%);
-    animation-delay: 0.75s;
+.police-light.blue {
+    right: -200px;
+    background: radial-gradient(circle, var(--blue-light) 30%, transparent 80%);
+    animation-delay: 0.4s;
 }
 
-@keyframes lightFlash {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.8; }
+@keyframes policeChaseFlash {
+    0%   { 
+        opacity: 0.2; 
+        filter: blur(80px) brightness(1) saturate(2);
+        transform: translateY(-50%) scale(0.8);
+    }
+    50%  { 
+        opacity: 1; 
+        filter: blur(100px) brightness(1.8) saturate(3);
+        transform: translateY(-50%) scale(1.1);
+    }
+    100% { 
+        opacity: 0.2; 
+        filter: blur(80px) brightness(1) saturate(2);
+        transform: translateY(-50%) scale(0.8);
+    }
 }
 
 .loading-logo {
-    width: 200px;
+    width: 180px;
     height: auto;
-    animation: logoPulse 2s infinite;
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+    z-index: 2;
+    animation: logoPulse 1.5s infinite;
+    filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.5));
 }
 
 @keyframes logoPulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.1); opacity: 1; }
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.18); opacity: 1; }
 }
 
 /* Redirect Page Styles */
@@ -1102,7 +1111,7 @@ footer {
 .online-dot {
     width: 10px;
     height: 10px;
-    background: #2ecc71;
+    background: #00c3ff;
     border-radius: 50%;
 }
 

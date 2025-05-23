@@ -321,8 +321,13 @@ function checkPageAccess() {
 document.addEventListener('readystatechange', () => {
     if (document.readyState === 'complete') {
         const overlay = document.getElementById('loading-overlay');
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 500);
+        if (overlay) {
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.5s ease-out';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500);
+        }
     }
 });
 
