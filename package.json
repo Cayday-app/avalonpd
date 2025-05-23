@@ -2,19 +2,11 @@
   "name": "apd-chat",
   "version": "1.0.0",
   "private": true,
-  "type": "commonjs",
   "engines": {
-    "node": "18.17.0",
-    "npm": "9.6.7"
+    "node": "18"
   },
   "scripts": {
-    "dev": "netlify dev",
-    "build": "npm install && cd functions && npm install",
-    "postinstall": "cd functions && npm install"
-  },
-  "dependencies": {
-    "@netlify/functions": "^2.0.0",
-    "netlify-cli": "^21.4.2"
+    "dev": "netlify dev"
   },
   "devDependencies": {
     "netlify-cli": "^21.4.2"
