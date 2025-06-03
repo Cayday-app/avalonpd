@@ -4,7 +4,13 @@
 
 [functions]
   node_bundler = "esbuild"
+  included_files = ["functions/**"]
   external_node_modules = ["node-fetch"]
+
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
 [[redirects]]
   from = "/api/*"
@@ -23,8 +29,13 @@
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
 
+[build.environment]
+  NODE_VERSION = "18"
+  AWS_LAMBDA_JS_RUNTIME = "nodejs18.x"
+
 [dev]
   framework = "#static"
   port = 8888
+  debug = true
 
 # Explicitly disable all plugins 

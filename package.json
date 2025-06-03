@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "description": "APD Potential Website",
   "scripts": {
-    "build": "cd functions && npm install"
+    "prebuild": "mkdir -p functions",
+    "build": "npm install && cd functions && npm install"
   },
-  "dependencies": {},
+  "dependencies": {
+    "node-fetch": "^2.6.9"
+  },
+  "devDependencies": {
+    "netlify-cli": "^21.0.0"
+  },
   "engines": {
     "node": ">=18"
   }

@@ -81,6 +81,20 @@ async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
         
+        // Test the functions endpoint first
+        console.log('Testing functions endpoint...');
+        try {
+            const testResponse = await fetch('/.netlify/functions/test', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            console.log('Test response:', await testResponse.text());
+        } catch (testError) {
+            console.error('Test endpoint failed:', testError);
+        }
+        
         console.log('Starting authentication process...');
         const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
