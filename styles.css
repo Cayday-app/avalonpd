@@ -1,13 +1,10 @@
 /* Base theme variables */
 :root {
-    --primary: #242424;
-    --accent: #3498db;
-    --text: #ffffff;
     --background: #1a1a1a;
-    --red-light: #ff3b3b;
-    --blue-light: #4d94ff;
+    --primary: #242424;
+    --text: #ffffff;
+    --accent: #3498db;
     --accent-hover: #2980b9;
-    --danger: #ff3b3b;
     --nav-background: rgba(26, 26, 26, 0.95);
 }
 
@@ -16,7 +13,6 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    transition: all 0.3s ease;
 }
 
 html, body {
@@ -26,7 +22,6 @@ html, body {
     line-height: 1.6;
     background-color: var(--background);
     color: var(--text);
-    visibility: visible !important;
 }
 
 body {
@@ -34,12 +29,11 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    opacity: 1 !important;
 }
 
+/* Navbar styles */
 nav {
     background: var(--nav-background);
-    backdrop-filter: blur(10px);
     position: fixed;
     top: 0;
     left: 0;
@@ -57,7 +51,6 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
-    background: transparent;
 }
 
 .nav-links {
@@ -1936,7 +1929,7 @@ footer {
 /* Division page styles */
 .division-header {
     height: 400px;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), var(--background);
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
     background-size: cover;
     background-position: center;
     display: flex;
@@ -1945,7 +1938,6 @@ footer {
     align-items: center;
     text-align: center;
     padding: 0 20px;
-    margin-top: 60px;
 }
 
 .division-header h1 {
@@ -1967,7 +1959,6 @@ footer {
     max-width: 1200px;
     margin: 0 auto;
     padding: 4rem 20px;
-    background: transparent;
 }
 
 .division-section {
