@@ -81,21 +81,43 @@ async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
         
+        console.log('Starting authentication process...');
         const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ code })
         });
         
+        console.log('Response status:', response.status);
+        const contentType = response.headers.get('content-type');
+        console.log('Response content type:', contentType);
+        
+        let errorMessage = 'Authentication failed';
+        
         if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Auth response error:', errorData);
-            throw new Error(errorData || 'Authentication failed');
+            const text = await response.text();
+            console.error('Auth response error:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: text
+            });
+            
+            try {
+                // Try to parse as JSON
+                const errorData = JSON.parse(text);
+                errorMessage = errorData.error || errorMessage;
+            } catch (e) {
+                // If it's not JSON, use the text directly
+                errorMessage = text;
+            }
+            throw new Error(errorMessage);
         }
         
         const data = await response.json();
+        console.log('Authentication response received');
         
         if (!data.token || !data.userData) {
             console.error('Invalid response data:', data);
@@ -107,7 +129,7 @@ async function handleAuthCode(code) {
         localStorage.setItem('user_data', JSON.stringify(data.userData));
         localStorage.setItem('roles', JSON.stringify(data.roles));
         localStorage.setItem('has_access', data.hasAccess ? 'true' : 'false');
-        localStorage.setItem('creator_role', data.creatorRole); // Store creator role
+        localStorage.setItem('creator_role', data.creatorRole);
         
         // Update UI
         updateLoginState();
@@ -119,7 +141,7 @@ async function handleAuthCode(code) {
         
     } catch (error) {
         console.error('Authentication error:', error);
-        showToast('Authentication failed: ' + error.message, true);
+        showToast(error.message || 'Authentication failed', true);
         localStorage.removeItem('discord_token');
         localStorage.removeItem('user_data');
         localStorage.removeItem('roles');
