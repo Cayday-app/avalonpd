@@ -63,12 +63,14 @@ function handleDiscordAuth() {
     const clientId = '1363747847039881347'; // This should match your Netlify env var
     const redirectUri = encodeURIComponent(window.location.origin);
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
+    const guildId = '1363747433074655433'; // Add guild ID for proper authorization
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
         `&redirect_uri=${redirectUri}` +
         `&response_type=code` +
         `&scope=${scopes}` +
+        `&guild_id=${guildId}` + // Add guild ID to pre-select server
         `&prompt=consent`;
     
     window.location.href = authUrl;
@@ -88,16 +90,24 @@ async function handleAuthCode(code) {
         });
         
         if (!response.ok) {
-            throw new Error('Authentication failed');
+            const errorData = await response.text();
+            console.error('Auth response error:', errorData);
+            throw new Error(errorData || 'Authentication failed');
         }
         
         const data = await response.json();
+        
+        if (!data.token || !data.userData) {
+            console.error('Invalid response data:', data);
+            throw new Error('Invalid authentication response');
+        }
         
         // Store the data
         localStorage.setItem('discord_token', data.token);
         localStorage.setItem('user_data', JSON.stringify(data.userData));
         localStorage.setItem('roles', JSON.stringify(data.roles));
         localStorage.setItem('has_access', data.hasAccess ? 'true' : 'false');
+        localStorage.setItem('creator_role', data.creatorRole); // Store creator role
         
         // Update UI
         updateLoginState();
@@ -114,6 +124,7 @@ async function handleAuthCode(code) {
         localStorage.removeItem('user_data');
         localStorage.removeItem('roles');
         localStorage.removeItem('has_access');
+        localStorage.removeItem('creator_role');
     }
 }
 
