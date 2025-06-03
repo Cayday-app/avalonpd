@@ -29,12 +29,22 @@ function initializeAuth() {
     // Handle OAuth code if present
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const storedState = localStorage.getItem('discord_state');
     
     if (code) {
-        handleAuthCode(code).catch(error => {
-            console.error('Auth error:', error);
-            showToast(error.message || 'Authentication failed', true);
-        });
+        // Verify state to prevent CSRF attacks
+        if (state && state === storedState) {
+            handleAuthCode(code).catch(error => {
+                console.error('Auth error:', error);
+                showToast(error.message || 'Authentication failed', true);
+            });
+        } else {
+            console.error('State mismatch');
+            showToast('Authentication failed: Invalid state', true);
+        }
+        // Clean up state
+        localStorage.removeItem('discord_state');
     }
 }
 
@@ -64,22 +74,34 @@ function updateLoginState() {
     }
 }
 
+// Generate a random state string
+function generateState() {
+    const array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, dec => ('0' + dec.toString(16)).slice(-2)).join('');
+}
+
 // Handle Discord auth
 function handleDiscordAuth() {
     // Get environment variables from window.ENV (injected by Netlify)
     const clientId = window.ENV?.DISCORD_CLIENT_ID || '1363747847039881347';
-    const redirectUri = window.location.origin;
+    const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
     const guildId = window.ENV?.DISCORD_GUILD_ID || '1363747433074655433';
+    
+    // Generate and store state for CSRF protection
+    const state = generateState();
+    localStorage.setItem('discord_state', state);
     
     // Save the current URL to return to after login
     localStorage.setItem('login_redirect', window.location.href);
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&redirect_uri=${redirectUri}` +
         `&response_type=code` +
         `&scope=${scopes}` +
+        `&state=${state}` +
         `&guild_id=${guildId}` +
         `&prompt=consent`;
     
@@ -99,7 +121,7 @@ async function handleAuthCode(code) {
             },
             body: JSON.stringify({ 
                 code,
-                redirectUri: window.location.origin 
+                redirectUri: window.location.origin + '/auth/callback'
             })
         });
         
@@ -135,6 +157,7 @@ async function handleAuthCode(code) {
         // Remove the code from the URL without refreshing
         const url = new URL(window.location.href);
         url.searchParams.delete('code');
+        url.searchParams.delete('state');
         window.history.replaceState({}, document.title, url.toString());
         
         showToast('Successfully logged in!');
