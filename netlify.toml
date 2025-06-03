@@ -35,4 +35,29 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
 
+[[headers]]
+  for = "/*.css"
+    [headers.values]
+    Content-Type = "text/css"
+
+[[headers]]
+  for = "/*.js"
+    [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/*.png"
+    [headers.values]
+    Content-Type = "image/png"
+
+[[headers]]
+  for = "/*.jpg"
+    [headers.values]
+    Content-Type = "image/jpeg"
+
+[[headers]]
+  for = "/*.mp3"
+    [headers.values]
+    Content-Type = "audio/mpeg"
+
 # Explicitly disable all plugins 

@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create notification sound element
     const notificationSound = document.createElement('audio');
     notificationSound.id = 'notification-sound';
-    notificationSound.src = 'notification.mp3';
+    notificationSound.src = '/notification.mp3';
     notificationSound.style.display = 'none';
     document.body.appendChild(notificationSound);
     
@@ -503,7 +503,7 @@ function showUpdateNotification(update) {
     // Play sound with user interaction workaround for Chrome
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        fetch('notification.mp3')
+        fetch('/notification.mp3')
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
             .then(audioBuffer => {
@@ -517,7 +517,7 @@ function showUpdateNotification(update) {
     } catch (e) {
         console.error("AudioContext error:", e);
         // Fallback method
-        const sound = new Audio('notification.mp3');
+        const sound = new Audio('/notification.mp3');
         sound.volume = 0.8;
         const playPromise = sound.play();
         if (playPromise) {
@@ -591,7 +591,7 @@ function showUpdateToast(update) {
     // Play sound button (needs user interaction for Chrome)
     const playBtn = updateToast.querySelector('.play-sound-btn');
     playBtn.addEventListener('click', () => {
-        const sound = new Audio('notification.mp3');
+        const sound = new Audio('/notification.mp3');
         sound.volume = 0.8;
         sound.play().catch(e => console.error("Sound button failed:", e));
     });

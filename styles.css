@@ -156,7 +156,7 @@ nav a:hover::after {
     text-align: center;
     position: relative;
     padding: 0 20px;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('police_lineup.jpg');
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/police_lineup.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
