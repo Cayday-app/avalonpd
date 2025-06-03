@@ -4,15 +4,25 @@
 
 [functions]
   directory = "functions"
+  node_bundler = "esbuild"
+
+# Handle the callback route first
+[[redirects]]
+  from = "/auth/callback"
+  to = "/callback.html"
+  status = 200
+  force = true
+
+# Then handle all other routes
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/*"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/*"
   status = 200
 
 [build.environment]
