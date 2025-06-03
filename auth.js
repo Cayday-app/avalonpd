@@ -5,6 +5,28 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeAuth() {
+    // Check if we're on the callback page
+    if (window.location.pathname === '/auth/callback') {
+        // Add loading overlay if not present
+        let loadingOverlay = document.getElementById('loading-overlay');
+        if (!loadingOverlay) {
+            loadingOverlay = document.createElement('div');
+            loadingOverlay.id = 'loading-overlay';
+            loadingOverlay.innerHTML = `
+                <div class="loading-container">
+                    <div class="police-lights">
+                        <div class="police-light red"></div>
+                        <div class="police-light blue"></div>
+                    </div>
+                    <img src="/apdlogo.png" alt="APD Logo" class="loading-logo" />
+                </div>
+            `;
+            document.body.appendChild(loadingOverlay);
+        }
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.opacity = '1';
+    }
+
     // Check login state
     const token = localStorage.getItem('discord_token');
     const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
@@ -14,17 +36,6 @@ function initializeAuth() {
     
     // Update restricted nav visibility
     updateRestrictedNav();
-    
-    // Hide loading overlay
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        setTimeout(() => {
-            loadingOverlay.style.opacity = 0;
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-            }, 300);
-        }, 500);
-    }
     
     // Handle OAuth code if present
     const urlParams = new URLSearchParams(window.location.search);
@@ -38,13 +49,28 @@ function initializeAuth() {
             handleAuthCode(code).catch(error => {
                 console.error('Auth error:', error);
                 showToast(error.message || 'Authentication failed', true);
+                // Redirect to home page on error
+                window.location.href = '/';
             });
         } else {
             console.error('State mismatch');
             showToast('Authentication failed: Invalid state', true);
+            // Redirect to home page on error
+            window.location.href = '/';
         }
         // Clean up state
         localStorage.removeItem('discord_state');
+    } else {
+        // Hide loading overlay if no auth code
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            setTimeout(() => {
+                loadingOverlay.style.opacity = 0;
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 300);
+            }, 500);
+        }
     }
 }
 
