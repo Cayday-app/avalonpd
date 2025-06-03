@@ -85,7 +85,8 @@ function generateState() {
 function handleDiscordAuth() {
     // Get environment variables from window.ENV (injected by Netlify)
     const clientId = window.ENV?.DISCORD_CLIENT_ID || '1363747847039881347';
-    const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
+    const baseUri = window.location.origin;
+    const redirectUri = `${baseUri}/auth/callback`;
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
     const guildId = window.ENV?.DISCORD_GUILD_ID || '1363747433074655433';
     
@@ -98,12 +99,16 @@ function handleDiscordAuth() {
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
-        `&redirect_uri=${redirectUri}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&response_type=code` +
         `&scope=${scopes}` +
         `&state=${state}` +
         `&guild_id=${guildId}` +
         `&prompt=consent`;
+    
+    // Log the redirect URI for verification
+    console.log('Redirect URI:', redirectUri);
+    console.log('Full Auth URL:', authUrl);
     
     window.location.href = authUrl;
 }
@@ -114,6 +119,9 @@ async function handleAuthCode(code) {
         showToast('Authenticating...');
         
         console.log('Starting authentication process...');
+        const baseUri = window.location.origin;
+        const redirectUri = `${baseUri}/auth/callback`;
+        
         const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
             headers: {
@@ -121,7 +129,7 @@ async function handleAuthCode(code) {
             },
             body: JSON.stringify({ 
                 code,
-                redirectUri: window.location.origin + '/auth/callback'
+                redirectUri: redirectUri
             })
         });
         
