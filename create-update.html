@@ -127,7 +127,7 @@
                 console.log('Submitting update:', data); // Debug log
                 console.log('Auth token:', authData.token); // Debug log
 
-                const res = await fetch('/.netlify/functions/updates', {
+                const res = await fetch('/api/updates', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
