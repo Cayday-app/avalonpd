@@ -43,15 +43,6 @@ function handleDiscordAuth() {
 // Handle the authorization token from Discord
 async function handleAuthToken(accessToken, tokenType) {
     try {
-        // Verify state to prevent CSRF attacks
-        const storedState = localStorage.getItem('discord_auth_state');
-        const urlState = new URLSearchParams(window.location.hash.slice(1)).get('state');
-        
-        if (!storedState || storedState !== urlState) {
-            throw new Error('Invalid state parameter');
-        }
-        
-        localStorage.removeItem('discord_auth_state');
         localStorage.setItem('discord_token', accessToken);
         
         // Fetch user data
@@ -91,15 +82,14 @@ async function handleAuthToken(accessToken, tokenType) {
             unlockRestrictedContent();
         }
         
-        // Clean up URL
-        window.history.replaceState({}, document.title, '/');
-        
+        return true;
     } catch (error) {
         console.error('Authentication error:', error);
         localStorage.removeItem('discord_token');
         localStorage.removeItem('user_data');
         localStorage.removeItem('roles');
         localStorage.removeItem('has_access');
+        return false;
     }
 }
 
@@ -136,24 +126,32 @@ function logout() {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Restore login state
-    const token = localStorage.getItem('discord_token');
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-    const hasAccess = localStorage.getItem('has_access') === 'true';
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check for temporary tokens from callback page
+    const tempToken = sessionStorage.getItem('temp_access_token');
+    const tempTokenType = sessionStorage.getItem('temp_token_type');
     
-    if (userData.username) {
-        updateLoginButton(userData);
-    }
-    if (hasAccess) {
-        unlockRestrictedContent();
-    }
-
-    // Handle OAuth token in URL hash
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
-    
-    if (accessToken) {
-        handleAuthToken(accessToken, tokenType);
+    if (tempToken && tempTokenType) {
+        // Clear temporary storage
+        sessionStorage.removeItem('temp_access_token');
+        sessionStorage.removeItem('temp_token_type');
+        
+        // Handle the authentication
+        const success = await handleAuthToken(tempToken, tempTokenType);
+        if (!success) {
+            console.error('Failed to authenticate with temporary tokens');
+        }
+    } else {
+        // Regular initialization
+        const token = localStorage.getItem('discord_token');
+        const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        const hasAccess = localStorage.getItem('has_access') === 'true';
+        
+        if (userData.username) {
+            updateLoginButton(userData);
+        }
+        if (hasAccess) {
+            unlockRestrictedContent();
+        }
     }
 });
