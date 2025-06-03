@@ -109,13 +109,11 @@ function updateRestrictedNav() {
     
     // Check if user has required roles
     const hasAccess = authData.user?.roles?.some(role => [
-        // Add your role IDs here
-        '1363747433074655433', // Example role ID
+        '1363749144266674267', // Member role for documents access
     ].includes(role));
     
-    const isCreator = authData.user?.roles?.some(role => [
-        // Add creator role IDs here
-        '1363747433074655434', // Example creator role ID
+    const isHR = authData.user?.roles?.some(role => [
+        '1363771721177628692', // HR role
     ].includes(role));
     
     // Update visibility
@@ -124,7 +122,7 @@ function updateRestrictedNav() {
     });
     
     restrictedCreate.forEach(nav => {
-        nav.style.display = isCreator ? '' : 'none';
+        nav.style.display = isHR ? '' : 'none';
     });
 }
 

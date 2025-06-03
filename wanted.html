@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wanted Persons - APD Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .wanted-section {
+            padding: 100px 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('police_lineup.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: calc(100vh - 60px);
+        }
+
+        .wanted-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .wanted-header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .wanted-header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff3b3b, #4d94ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 59, 59, 0.3);
+        }
+
+        .wanted-header p {
+            font-size: 1.2rem;
+            color: var(--text);
+            opacity: 0.9;
+        }
+
+        .wanted-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .wanted-card {
+            background: rgba(26, 26, 26, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .wanted-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(255, 59, 59, 0.2);
+        }
+
+        .wanted-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-bottom: 2px solid rgba(255, 59, 59, 0.5);
+        }
+
+        .wanted-info {
+            padding: 20px;
+        }
+
+        .wanted-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .wanted-description {
+            color: var(--text);
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .wanted-alert {
+            background: rgba(255, 59, 59, 0.1);
+            border-left: 4px solid #ff3b3b;
+            padding: 15px;
+            font-weight: 500;
+            color: #ff3b3b;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .police-lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            z-index: 1000;
+            animation: policeLights 2s infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes policeLights {
+            0%, 100% { background: #ff3b3b; }
+            50% { background: #4d94ff; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="police-lights"></div>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="/"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+                <a href="/">HOME</a>
+                <a href="/coc.html">COC</a>
+                <a href="/roster.html" class="restricted-nav">ROSTER</a>
+                <a href="/sop.html" class="restricted-nav">SOP</a>
+                <a href="/group.html" class="restricted-nav">GROUP</a>
+                <a href="/shift-log.html" class="restricted-nav">SHIFT LOG</a>
+                <a href="/wanted.html">WANTED</a>
+                <a href="/create-update.html" class="restricted-create">CREATE UPDATE</a>
+                <a href="/updates.html">UPDATES</a>
+            </div>
+            <div class="nav-icons">
+                <button onclick="handleDiscordAuth()" class="login-btn">
+                    <i class="fab fa-discord"></i>
+                    LOGIN WITH DISCORD
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="wanted-section">
+        <div class="wanted-container">
+            <div class="wanted-header">
+                <h1>MOST WANTED</h1>
+                <p>Help us keep Avalon safe by identifying these individuals</p>
+            </div>
+            <div class="wanted-grid">
+                <div class="wanted-card">
+                    <img src="wanted1.jpg" alt="Wanted Person 1" class="wanted-image">
+                    <div class="wanted-info">
+                        <h2 class="wanted-name">John "Ghost" Doe</h2>
+                        <p class="wanted-description">Wanted for multiple armed robberies and evading police. Last seen in the Downtown district. Known to be armed and extremely dangerous.</p>
+                        <div class="wanted-alert">
+                            IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wanted-card">
+                    <img src="wanted2.jpg" alt="Wanted Person 2" class="wanted-image">
+                    <div class="wanted-info">
+                        <h2 class="wanted-name">Sarah "Viper" Smith</h2>
+                        <p class="wanted-description">Wanted for cyber crimes and identity theft. Known to frequent internet cafes and tech hubs. Approach with extreme caution.</p>
+                        <div class="wanted-alert">
+                            IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wanted-card">
+                    <img src="wanted3.jpg" alt="Wanted Person 3" class="wanted-image">
+                    <div class="wanted-info">
+                        <h2 class="wanted-name">Marcus "Shadow" Johnson</h2>
+                        <p class="wanted-description">Wanted for drug trafficking and organized crime activities. Known to operate in the Harbor area. Considered armed and dangerous.</p>
+                        <div class="wanted-alert">
+                            IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
