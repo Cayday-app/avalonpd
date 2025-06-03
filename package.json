@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "APD Potential Website",
   "scripts": {
-    "prebuild": "mkdir -p functions",
-    "build": "npm install && cd functions && npm install"
+    "prebuild": "cd netlify/functions && npm install",
+    "build": "npm install"
   },
   "dependencies": {
     "node-fetch": "^2.6.9"
