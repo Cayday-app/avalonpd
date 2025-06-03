@@ -1,26 +1,7 @@
 // Auth handling
 document.addEventListener('DOMContentLoaded', function() {
-    // Load config from config.json
-    fetch('/config.json')
-        .then(response => response.json())
-        .then(loadedConfig => {
-            window.config = loadedConfig;
-            initializeAuth();
-        })
-        .catch(error => {
-            console.error('Failed to load config:', error);
-            // Fallback to default config
-            window.config = {
-                discord: {
-                    clientId: '1363747847039881347',
-                    guildId: '1363747433074655433',
-                    requiredRoles: ['1363749144266674267'],
-                    creatorRole: '1363771721177628692',
-                    redirectUri: 'https://avalonpd.netlify.app'
-                }
-            };
-            initializeAuth();
-        });
+    // Initialize auth
+    initializeAuth();
 });
 
 function initializeAuth() {
@@ -46,11 +27,11 @@ function initializeAuth() {
     }
     
     // Handle OAuth code if present
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
     
-    if (accessToken) {
-        handleAuthToken(accessToken, tokenType);
+    if (code) {
+        handleAuthCode(code);
     }
 }
 
@@ -79,58 +60,44 @@ function updateLoginState() {
 
 // Handle Discord auth
 function handleDiscordAuth() {
-    const config = window.config.discord;
+    const clientId = '1363747847039881347'; // This should match your Netlify env var
+    const redirectUri = encodeURIComponent(window.location.origin);
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
-        `?client_id=${config.clientId}` +
-        `&redirect_uri=${encodeURIComponent(config.redirectUri)}` +
-        `&response_type=token` +
+        `?client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&response_type=code` +
         `&scope=${scopes}` +
-        `&guild_id=${config.guildId}` +
         `&prompt=consent`;
     
     window.location.href = authUrl;
 }
 
-// Handle the authorization token from Discord
-async function handleAuthToken(accessToken, tokenType) {
+// Handle the authorization code from Discord
+async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
         
-        // Store the token
-        localStorage.setItem('discord_token', accessToken);
-        
-        // Fetch user data
-        const userResponse = await fetch('https://discord.com/api/users/@me', {
+        const response = await fetch('/.netlify/functions/discord-auth', {
+            method: 'POST',
             headers: {
-                'Authorization': `${tokenType} ${accessToken}`
-            }
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code })
         });
         
-        if (!userResponse.ok) throw new Error('Failed to fetch user data');
-        const userData = await userResponse.json();
-        localStorage.setItem('user_data', JSON.stringify(userData));
+        if (!response.ok) {
+            throw new Error('Authentication failed');
+        }
         
-        // Fetch guild member data
-        const guildId = window.config.discord.guildId;
-        const memberResponse = await fetch(`https://discord.com/api/users/@me/guilds/${guildId}/member`, {
-            headers: {
-                'Authorization': `${tokenType} ${accessToken}`
-            }
-        });
+        const data = await response.json();
         
-        if (!memberResponse.ok) throw new Error('Failed to fetch member data');
-        const memberData = await memberResponse.json();
-        
-        // Check roles
-        const roles = memberData.roles || [];
-        localStorage.setItem('roles', JSON.stringify(roles));
-        
-        const hasAccess = roles.some(role => 
-            window.config.discord.requiredRoles.includes(role)
-        );
-        localStorage.setItem('has_access', hasAccess ? 'true' : 'false');
+        // Store the data
+        localStorage.setItem('discord_token', data.token);
+        localStorage.setItem('user_data', JSON.stringify(data.userData));
+        localStorage.setItem('roles', JSON.stringify(data.roles));
+        localStorage.setItem('has_access', data.hasAccess ? 'true' : 'false');
         
         // Update UI
         updateLoginState();
@@ -169,16 +136,17 @@ function handleLogout() {
 // Update restricted nav visibility
 function updateRestrictedNav() {
     const token = localStorage.getItem('discord_token');
-    const userRoles = JSON.parse(localStorage.getItem('roles') || '[]');
     const hasAccess = localStorage.getItem('has_access') === 'true';
+    const userRoles = JSON.parse(localStorage.getItem('roles') || '[]');
     
     const restrictedNavItems = document.querySelectorAll('.restricted-nav');
     restrictedNavItems.forEach(item => {
         item.style.display = (token && hasAccess) ? 'block' : 'none';
     });
     
+    // We'll get the creator role from the server response
     const restrictedCreateItems = document.querySelectorAll('.restricted-create');
-    const hasCreatorRole = userRoles.includes(window.config.discord.creatorRole);
+    const hasCreatorRole = userRoles.includes(localStorage.getItem('creator_role'));
     restrictedCreateItems.forEach(item => {
         item.style.display = (token && hasCreatorRole) ? 'block' : 'none';
     });
