@@ -77,7 +77,7 @@
     <script src="auth.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const authData = JSON.parse(localStorage.getItem('discord_auth') || '{}');
+        const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
         const isHR = authData.user?.roles?.includes('1363771721177628692');
         const formContainer = document.getElementById('update-form-container');
         const hrMessage = document.getElementById('hr-only-message');

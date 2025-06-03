@@ -136,19 +136,19 @@ function updateRestrictedNav() {
     const userRoles = authData.user?.roles || [];
     
     console.log('Current user roles:', userRoles);
+    console.log('Looking for HR role:', ROLES.HR);
+    console.log('Looking for Officer role:', ROLES.OFFICER);
 
     // Elements that require any officer role
     const restrictedNav = document.querySelectorAll('.restricted-nav');
-    const isOfficer = hasAnyRole(userRoles, [
-        ROLES.OFFICER,
-        ROLES.COMMAND,
-        ROLES.DETECTIVE,
-        ROLES.FTO
-    ]);
+    const isOfficer = hasAnyRole(userRoles, [ROLES.OFFICER]);
+    console.log('Is Officer:', isOfficer);
 
     // Elements that require HR role
     const restrictedCreate = document.querySelectorAll('.restricted-create');
     const isHR = hasRole(userRoles, ROLES.HR);
+    console.log('Is HR:', isHR);
+    console.log('HR elements found:', restrictedCreate.length);
 
     // Update visibility based on roles
     restrictedNav.forEach(nav => {
@@ -156,6 +156,7 @@ function updateRestrictedNav() {
     });
 
     restrictedCreate.forEach(nav => {
+        console.log('Setting HR element display:', isHR ? 'inline-block' : 'none');
         nav.style.display = isHR ? 'inline-block' : 'none';
     });
 
@@ -352,7 +353,7 @@ async function handleAuthToken(accessToken, tokenType) {
             }
         });
         const memberData = await memberResponse.json();
-        console.log('Member data:', memberData);
+        console.log('Member data with roles:', memberData);
 
         if (!memberData.roles || memberData.roles.length === 0) {
             throw new Error('You must be a member of the Avalon Police Department Discord server.');
@@ -370,7 +371,7 @@ async function handleAuthToken(accessToken, tokenType) {
             }
         };
         
-        console.log('Storing auth data:', authData);
+        console.log('Storing auth data with roles:', authData);
         sessionStorage.setItem('discord_auth', JSON.stringify(authData));
         
         // Update UI
