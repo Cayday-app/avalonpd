@@ -1,14 +1,14 @@
 /* Base theme variables */
 :root {
-    --primary: #1a1a1a;
+    --primary: #242424;
     --accent: #3498db;
     --text: #ffffff;
-    --background: #0f0f0f;
+    --background: #1a1a1a;
     --red-light: #ff3b3b;
     --blue-light: #4d94ff;
-    --accent-hover: #2563eb;
+    --accent-hover: #2980b9;
     --danger: #ff3b3b;
-    --nav-background: rgba(15, 15, 15, 0.95);
+    --nav-background: rgba(26, 26, 26, 0.95);
 }
 
 /* Reset and base styles */
@@ -1935,10 +1935,9 @@ footer {
 /* Division page styles */
 .division-header {
     height: 400px;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../police_cars.jpg');
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), var(--background);
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1952,9 +1951,7 @@ footer {
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 1rem;
-    background: linear-gradient(45deg, #ffffff, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text);
     text-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
 }
 
@@ -1969,10 +1966,15 @@ footer {
     max-width: 1200px;
     margin: 0 auto;
     padding: 4rem 20px;
+    background: var(--background);
 }
 
 .division-section {
     margin-bottom: 4rem;
+    background: var(--primary);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .division-section h2 {
