@@ -1,6 +1,7 @@
 {
   "name": "apdpotential",
   "version": "1.0.0",
+  "private": true,
   "description": "APD Potential Website",
   "scripts": {
     "prebuild": "cd netlify/functions && npm install",

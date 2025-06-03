@@ -81,26 +81,21 @@ async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
         
-        // Test the functions endpoint first
-        console.log('Testing functions endpoint...');
+        // Test the hello function first
+        console.log('Testing hello function...');
         try {
-            const testResponse = await fetch('/.netlify/functions/test', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            console.log('Test response:', await testResponse.text());
+            const testResponse = await fetch('/.netlify/functions/hello');
+            const testData = await testResponse.text();
+            console.log('Hello function response:', testData);
         } catch (testError) {
-            console.error('Test endpoint failed:', testError);
+            console.error('Hello function test failed:', testError);
         }
         
         console.log('Starting authentication process...');
         const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ code })
         });
@@ -109,8 +104,6 @@ async function handleAuthCode(code) {
         const contentType = response.headers.get('content-type');
         console.log('Response content type:', contentType);
         
-        let errorMessage = 'Authentication failed';
-        
         if (!response.ok) {
             const text = await response.text();
             console.error('Auth response error:', {
@@ -118,20 +111,11 @@ async function handleAuthCode(code) {
                 statusText: response.statusText,
                 body: text
             });
-            
-            try {
-                // Try to parse as JSON
-                const errorData = JSON.parse(text);
-                errorMessage = errorData.error || errorMessage;
-            } catch (e) {
-                // If it's not JSON, use the text directly
-                errorMessage = text;
-            }
-            throw new Error(errorMessage);
+            throw new Error(text || 'Authentication failed');
         }
         
         const data = await response.json();
-        console.log('Authentication response received');
+        console.log('Authentication response received:', data);
         
         if (!data.token || !data.userData) {
             console.error('Invalid response data:', data);
