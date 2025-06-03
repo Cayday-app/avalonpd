@@ -4,15 +4,38 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAuth();
 });
 
+// Cookie helper functions
+function setCookie(name, value, days = 7) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; secure; samesite=strict';
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; samesite=strict';
+}
+
 function initializeAuth() {
-    // Check if we have auth data
-    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    // Check if we have auth data in cookies
+    const authData = getCookie('discord_auth') ? JSON.parse(getCookie('discord_auth')) : null;
     
-    // Update UI based on login state
-    updateLoginState();
-    
-    // Update restricted nav visibility
-    updateRestrictedNav();
+    if (authData) {
+        // Validate token expiration
+        const now = Date.now();
+        if (authData.expiresAt && now < authData.expiresAt) {
+            // Token is still valid
+            updateLoginState();
+            updateRestrictedNav();
+        } else {
+            // Token expired, clear auth
+            handleLogout();
+        }
+    }
     
     // Hide loading overlay
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -28,11 +51,11 @@ function initializeAuth() {
 
 // Update login button and user state
 function updateLoginState() {
-    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const authData = getCookie('discord_auth') ? JSON.parse(getCookie('discord_auth')) : null;
     const loginBtn = document.querySelector('.login-btn');
     
     if (loginBtn) {
-        if (authData.user) {
+        if (authData?.user) {
             // User is logged in
             loginBtn.innerHTML = `
                 <img src="${authData.user.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
@@ -85,7 +108,7 @@ function handleDiscordAuth() {
 // Handle logout
 function handleLogout() {
     // Clear auth data
-    sessionStorage.removeItem('discord_auth');
+    deleteCookie('discord_auth');
     
     // Update UI
     updateLoginState();
@@ -103,14 +126,14 @@ function handleLogout() {
 
 // Update restricted navigation visibility
 function updateRestrictedNav() {
-    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const authData = getCookie('discord_auth') ? JSON.parse(getCookie('discord_auth')) : null;
     const restrictedCreate = document.querySelectorAll('.restricted-create');
     const editButtons = document.querySelectorAll('.edit-btn');
     
     console.log('Current auth data:', authData); // Debug log
     
     // Check if user has HR role
-    const isHR = authData.user?.roles?.includes('1363771721177628692'); // HR role
+    const isHR = authData?.user?.roles?.includes('1363771721177628692'); // HR role
     console.log('Is HR:', isHR); // Debug log
     
     // Update visibility
@@ -315,7 +338,7 @@ async function handleAuthToken(accessToken, tokenType) {
         const memberData = await memberResponse.json();
         console.log('Member data:', memberData); // Debug log
 
-        // Store auth data with roles
+        // Store auth data with expiration
         const authData = {
             token: accessToken,
             tokenType: tokenType,
@@ -323,11 +346,12 @@ async function handleAuthToken(accessToken, tokenType) {
                 ...userData,
                 roles: memberData.roles || [],
                 avatar: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : null
-            }
+            },
+            expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days from now
         };
         
         console.log('Auth data being stored:', authData); // Debug log
-        sessionStorage.setItem('discord_auth', JSON.stringify(authData));
+        setCookie('discord_auth', JSON.stringify(authData), 7);
         
         // Update UI
         updateLoginState();
@@ -337,8 +361,8 @@ async function handleAuthToken(accessToken, tokenType) {
         showToast('Successfully logged in!');
         
         // Redirect back to original page
-        const redirectUrl = sessionStorage.getItem('login_redirect') || '/';
-        sessionStorage.removeItem('login_redirect');
+        const redirectUrl = getCookie('login_redirect') || '/';
+        deleteCookie('login_redirect');
         window.location.href = redirectUrl;
     } catch (error) {
         console.error('Auth error:', error);
