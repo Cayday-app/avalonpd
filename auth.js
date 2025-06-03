@@ -52,7 +52,10 @@ function updateLoginState() {
             loginBtn.onclick = handleLogout;
         } else {
             // User is not logged in
-            loginBtn.textContent = 'LOGIN WITH DISCORD';
+            loginBtn.innerHTML = `
+                <i class="fab fa-discord"></i>
+                LOGIN WITH DISCORD
+            `;
             loginBtn.onclick = handleDiscordAuth;
         }
     }
@@ -60,17 +63,20 @@ function updateLoginState() {
 
 // Handle Discord auth
 function handleDiscordAuth() {
-    const clientId = '1363747847039881347'; // This should match your Netlify env var
+    const clientId = '1363747847039881347';
     const redirectUri = encodeURIComponent(window.location.origin);
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
-    const guildId = '1363747433074655433'; // Add guild ID for proper authorization
+    const guildId = '1363747433074655433';
+    
+    // Save the current URL to return to after login
+    localStorage.setItem('login_redirect', window.location.href);
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
         `&redirect_uri=${redirectUri}` +
         `&response_type=code` +
         `&scope=${scopes}` +
-        `&guild_id=${guildId}` + // Add guild ID to pre-select server
+        `&guild_id=${guildId}` +
         `&prompt=consent`;
     
     window.location.href = authUrl;
@@ -80,16 +86,6 @@ function handleDiscordAuth() {
 async function handleAuthCode(code) {
     try {
         showToast('Authenticating...');
-        
-        // Test the hello function first
-        console.log('Testing hello function...');
-        try {
-            const testResponse = await fetch('/.netlify/functions/hello');
-            const testData = await testResponse.text();
-            console.log('Hello function response:', testData);
-        } catch (testError) {
-            console.error('Hello function test failed:', testError);
-        }
         
         console.log('Starting authentication process...');
         const response = await fetch('/.netlify/functions/discord-auth', {
@@ -101,8 +97,6 @@ async function handleAuthCode(code) {
         });
         
         console.log('Response status:', response.status);
-        const contentType = response.headers.get('content-type');
-        console.log('Response content type:', contentType);
         
         if (!response.ok) {
             const text = await response.text();
@@ -133,19 +127,28 @@ async function handleAuthCode(code) {
         updateLoginState();
         updateRestrictedNav();
         
-        // Clean up URL
-        window.history.replaceState({}, document.title, '/');
+        // Return to the previous page or home
+        const redirectUrl = localStorage.getItem('login_redirect') || '/';
+        localStorage.removeItem('login_redirect');
+        window.location.href = redirectUrl;
+        
         showToast('Successfully logged in!');
         
     } catch (error) {
         console.error('Authentication error:', error);
         showToast(error.message || 'Authentication failed', true);
-        localStorage.removeItem('discord_token');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('roles');
-        localStorage.removeItem('has_access');
-        localStorage.removeItem('creator_role');
+        clearAuthData();
     }
+}
+
+// Clear all auth data
+function clearAuthData() {
+    localStorage.removeItem('discord_token');
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('roles');
+    localStorage.removeItem('has_access');
+    localStorage.removeItem('creator_role');
+    localStorage.removeItem('login_redirect');
 }
 
 // Handle logout

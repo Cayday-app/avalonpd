@@ -44,6 +44,14 @@ nav .nav-container {
     margin: 0 auto;
     width: 100%;
     padding: 0 20px;
+    justify-content: space-between;
+}
+
+nav .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
 }
 
 nav img.nav-logo {
@@ -60,6 +68,8 @@ nav a {
     border-radius: 8px;
     position: relative;
     overflow: hidden;
+    font-size: 14px;
+    letter-spacing: 0.5px;
 }
 
 nav a:hover {
@@ -84,42 +94,57 @@ nav a:hover::after {
     width: 80%;
 }
 
+.nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
 .login-btn {
     background: linear-gradient(45deg, var(--accent), #2980b9);
-    color: var(--text);
+    color: white !important;
     border: none;
-    padding: 12px 24px;
+    padding: 10px 20px !important;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
 }
 
 .login-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(45deg, #2980b9, var(--accent));
 }
 
-.login-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-    );
-    transition: 0.5s;
+.login-btn i {
+    font-size: 16px;
 }
 
-.login-btn:hover::before {
-    left: 100%;
+.theme-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
 
 .hero {
@@ -674,27 +699,24 @@ footer {
 }
 
 /* Theme modal and button styling */
-.nav-icons {
+.theme-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    margin-left: auto;
-    gap: 0.5rem;
+    justify-content: center;
 }
-.theme-btn {
-    background: var(--primary);
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text);
-    padding: 0.75rem;
-    border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+
 .theme-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
+
 .theme-modal {
     display: none; /* Start hidden */
     position: fixed;
@@ -706,6 +728,7 @@ footer {
     justify-content: center;
     animation: fadeIn 0.3s ease-out;
 }
+
 .theme-modal-content {
     background: var(--background);
     color: var(--text);
@@ -719,17 +742,20 @@ footer {
     position: relative;
     animation: slideInUp 0.3s ease-out;
 }
+
 .theme-modal-content h2 {
     font-size: 1.5rem;
     font-weight: 600;
     margin: 0;
     text-align: center;
 }
+
 .theme-type-options {
     display: flex;
     gap: 1rem;
     justify-content: center;
 }
+
 .theme-type-options label {
     position: relative;
     padding-left: 2rem;
@@ -737,11 +763,13 @@ footer {
     font-weight: 500;
     user-select: none;
 }
+
 .theme-type-options input[type="radio"] {
     position: absolute;
     opacity: 0;
     cursor: pointer;
 }
+
 .theme-type-options label:before {
     content: '';
     position: absolute;
@@ -754,20 +782,24 @@ footer {
     border-radius: 50%;
     background: transparent;
 }
+
 .theme-type-options input[type="radio"]:checked + label:before {
     background: var(--accent);
 }
+
 .theme-color-pickers {
     display: flex;
     gap: 1rem;
     justify-content: space-between;
 }
+
 .theme-color-pickers label {
     display: flex;
     flex-direction: column;
     align-items: center;
     font-weight: 500;
 }
+
 .theme-color-pickers input[type="color"] {
     width: 100%;
     height: 2.5rem;
@@ -776,6 +808,7 @@ footer {
     cursor: pointer;
     padding: 0;
 }
+
 #apply-theme-btn {
     background: var(--accent);
     color: var(--text);
@@ -787,11 +820,13 @@ footer {
     cursor: pointer;
     transition: all 0.3s ease;
 }
+
 #apply-theme-btn:hover {
     background: #2980b9;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
+
 .close {
     position: absolute;
     top: 1rem;
@@ -805,6 +840,7 @@ footer {
     padding: 0.25rem;
     border-radius: 50%;
 }
+
 .close:hover {
     background: rgba(255,255,255,0.1);
     color: var(--accent);
