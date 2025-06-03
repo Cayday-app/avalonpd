@@ -66,6 +66,19 @@ nav {
     flex: 1;
 }
 
+.nav-links a {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px 16px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
 .nav-logo {
     height: 28px;
     margin-right: 0.5rem;
@@ -105,7 +118,7 @@ nav a:hover::after {
 }
 
 .login-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     background: #5865F2;
     color: white;
@@ -114,7 +127,9 @@ nav a:hover::after {
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 140px;
 }
 
 .login-btn:hover {
@@ -126,10 +141,12 @@ nav a:hover::after {
     height: 24px;
     border-radius: 50%;
     margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .login-btn i {
     margin-right: 8px;
+    font-size: 16px;
 }
 
 .hero {
@@ -1596,7 +1613,7 @@ footer {
 
 /* Auth-related styles */
 .login-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     background: #5865F2;
     color: white;
@@ -1605,7 +1622,9 @@ footer {
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 140px;
 }
 
 .login-btn:hover {
@@ -1617,10 +1636,12 @@ footer {
     height: 24px;
     border-radius: 50%;
     margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .login-btn i {
     margin-right: 8px;
+    font-size: 16px;
 }
 
 /* Keyframe Animations */
@@ -1790,4 +1811,16 @@ footer {
 
 .wanted-card {
     position: relative;
+}
+
+/* Make sure restricted items don't affect layout when hidden */
+.restricted-nav,
+.restricted-create {
+    display: none;
+}
+
+.restricted-nav[style*="display: inline-block"],
+.restricted-create[style*="display: inline-block"] {
+    display: inline-flex !important;
+    align-items: center;
 } 
