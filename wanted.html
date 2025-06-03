@@ -46,50 +46,58 @@
 
         .wanted-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .wanted-card {
-            background: rgba(26, 26, 26, 0.95);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.8s ease-out;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
+            background: var(--background);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
-        .wanted-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(255, 59, 59, 0.2);
-        }
-
-        .wanted-image {
-            width: 100%;
-            height: 300px;
+        .wanted-card img {
+            width: 200px;
+            height: 200px;
             object-fit: cover;
-            border-bottom: 2px solid rgba(255, 59, 59, 0.5);
-        }
-
-        .wanted-info {
-            padding: 20px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--accent);
         }
 
         .wanted-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .wanted-info {
+            margin-bottom: 0.5rem;
             color: var(--text);
+        }
+
+        .wanted-charges {
+            font-weight: 500;
+            color: #ff3b3b;
+            margin-bottom: 1rem;
         }
 
         .wanted-description {
             color: var(--text);
-            opacity: 0.8;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .reward {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--accent);
         }
 
         .wanted-alert {
@@ -182,39 +190,36 @@
             </div>
             <div class="wanted-grid">
                 <div class="wanted-card">
-                    <button class="edit-btn" style="display: none;"><i class="fas fa-edit"></i></button>
-                    <img src="wanted1.jpg" alt="Wanted Person 1" class="wanted-image">
-                    <div class="wanted-info">
-                        <h2 class="wanted-name">John "The Ghost" Doe</h2>
-                        <p class="wanted-description">Wanted for multiple counts of grand theft auto and evading police.</p>
-                        <div class="wanted-alert">
-                            IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
-                        </div>
+                    <img src="placeholder.jpg" alt="Wanted person">
+                    <div class="wanted-name">John Doe</div>
+                    <div class="wanted-info">Age: 30 | Height: 6'0" | Weight: 180lbs</div>
+                    <div class="wanted-charges">Wanted for: Armed Robbery</div>
+                    <div class="wanted-description">
+                        Last seen in the downtown area. Known to frequent local bars and casinos.
                     </div>
+                    <div class="reward">Reward: $5,000</div>
                 </div>
 
                 <div class="wanted-card">
-                    <button class="edit-btn" style="display: none;"><i class="fas fa-edit"></i></button>
-                    <img src="wanted2.jpg" alt="Wanted Person 2" class="wanted-image">
-                    <div class="wanted-info">
-                        <h2 class="wanted-name">Sarah "Quicksilver" Smith</h2>
-                        <p class="wanted-description">Wanted for armed robbery and assault with a deadly weapon.</p>
-                        <div class="wanted-alert">
-                            IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
-                        </div>
+                    <img src="placeholder2.jpg" alt="Wanted person">
+                    <div class="wanted-name">Jane Smith</div>
+                    <div class="wanted-info">Age: 25 | Height: 5'6" | Weight: 140lbs</div>
+                    <div class="wanted-charges">Wanted for: Grand Theft Auto</div>
+                    <div class="wanted-description">
+                        Known to operate in the industrial district. May be armed and dangerous.
                     </div>
+                    <div class="reward">Reward: $3,000</div>
                 </div>
 
                 <div class="wanted-card">
-                    <button class="edit-btn" style="display: none;"><i class="fas fa-edit"></i></button>
-                    <img src="wanted3.jpg" alt="Wanted Person 3" class="wanted-image">
-                    <div class="wanted-info">
-                        <h2 class="wanted-name">Mike "The Shadow" Johnson</h2>
-                        <p class="wanted-description">Wanted for drug trafficking and organized crime involvement.</p>
-                        <div class="wanted-alert">
-                            IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
-                        </div>
+                    <img src="placeholder3.jpg" alt="Wanted person">
+                    <div class="wanted-name">Mike Johnson</div>
+                    <div class="wanted-info">Age: 35 | Height: 5'11" | Weight: 170lbs</div>
+                    <div class="wanted-charges">Wanted for: Drug Trafficking</div>
+                    <div class="wanted-description">
+                        Has connections to local drug rings. Known to use multiple aliases.
                     </div>
+                    <div class="reward">Reward: $10,000</div>
                 </div>
             </div>
         </div>

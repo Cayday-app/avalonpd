@@ -6,6 +6,8 @@
     --background: #0f0f0f;
     --red-light: #ff3b3b;
     --blue-light: #4d94ff;
+    --accent-hover: #2563eb;
+    --danger: #ff3b3b;
 }
 
 /* Reset and base styles */
@@ -1823,4 +1825,107 @@ footer {
 .restricted-create[style*="display: inline-block"] {
     display: inline-flex !important;
     align-items: center;
+}
+
+.nav-container {
+    background: var(--background);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-logo {
+    height: 40px;
+    margin-right: 2rem;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--accent);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: var(--background);
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+}
+
+.dropdown-content a {
+    color: var(--text);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.login-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+    background: var(--accent-hover);
+}
+
+.fa-discord {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        text-align: center;
+    }
+
+    .dropdown-content {
+        position: static;
+        width: 100%;
+    }
+
+    .nav-logo {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
 } 
