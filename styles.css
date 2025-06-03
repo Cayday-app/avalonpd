@@ -1880,4 +1880,170 @@ footer {
         margin-right: 0;
         margin-bottom: 1rem;
     }
+}
+
+/* Dropdown styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown > a::after {
+    content: '▼';
+    font-size: 0.7em;
+    margin-left: 6px;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.dropdown:hover > a::after {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--nav-background);
+    min-width: 200px;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 12px 16px;
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.dropdown-content a:hover {
+    background: rgba(52, 152, 219, 0.1);
+    transform: translateX(5px);
+}
+
+/* Division page styles */
+.division-header {
+    height: 400px;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../police_cars.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+    margin-top: 60px;
+}
+
+.division-header h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #ffffff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+}
+
+.division-header p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.division-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 20px;
+}
+
+.division-section {
+    margin-bottom: 4rem;
+}
+
+.division-section h2 {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+}
+
+.division-section p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text);
+    opacity: 0.9;
+}
+
+.division-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.division-section ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text);
+    opacity: 0.9;
+}
+
+.division-section ul li::before {
+    content: '•';
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.leader-card {
+    background: var(--primary);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.leader-card:hover {
+    transform: translateY(-5px);
+}
+
+.leader-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    border: 3px solid var(--accent);
+}
+
+.leader-card h3 {
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.leader-card p {
+    color: var(--accent);
+    font-weight: 500;
 } 
