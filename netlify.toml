@@ -9,7 +9,7 @@
 # Redirect all routes to index.html for client-side routing
 [[redirects]]
   from = "/auth/callback"
-  to = "/auth/callback/index.html"
+  to = "/auth/callback.html"
   status = 200
 
 [[redirects]]
