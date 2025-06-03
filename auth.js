@@ -31,7 +31,10 @@ function initializeAuth() {
     const code = urlParams.get('code');
     
     if (code) {
-        handleAuthCode(code);
+        handleAuthCode(code).catch(error => {
+            console.error('Auth error:', error);
+            showToast(error.message || 'Authentication failed', true);
+        });
     }
 }
 
@@ -64,7 +67,7 @@ function updateLoginState() {
 // Handle Discord auth
 function handleDiscordAuth() {
     const clientId = '1363747847039881347';
-    const redirectUri = encodeURIComponent(window.location.origin);
+    const redirectUri = window.location.origin;
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
     const guildId = '1363747433074655433';
     
@@ -73,7 +76,7 @@ function handleDiscordAuth() {
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
-        `&redirect_uri=${redirectUri}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&response_type=code` +
         `&scope=${scopes}` +
         `&guild_id=${guildId}` +
@@ -93,10 +96,11 @@ async function handleAuthCode(code) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ code })
+            body: JSON.stringify({ 
+                code,
+                redirectUri: window.location.origin 
+            })
         });
-        
-        console.log('Response status:', response.status);
         
         if (!response.ok) {
             const text = await response.text();
@@ -109,7 +113,7 @@ async function handleAuthCode(code) {
         }
         
         const data = await response.json();
-        console.log('Authentication response received:', data);
+        console.log('Authentication response received');
         
         if (!data.token || !data.userData) {
             console.error('Invalid response data:', data);
@@ -127,17 +131,27 @@ async function handleAuthCode(code) {
         updateLoginState();
         updateRestrictedNav();
         
-        // Return to the previous page or home
-        const redirectUrl = localStorage.getItem('login_redirect') || '/';
-        localStorage.removeItem('login_redirect');
-        window.location.href = redirectUrl;
+        // Remove the code from the URL without refreshing
+        const url = new URL(window.location.href);
+        url.searchParams.delete('code');
+        window.history.replaceState({}, document.title, url.toString());
         
         showToast('Successfully logged in!');
+        
+        // Get the redirect URL and remove it from storage
+        const redirectUrl = localStorage.getItem('login_redirect') || '/';
+        localStorage.removeItem('login_redirect');
+        
+        // Only redirect if we're not already on the target page
+        if (window.location.pathname !== redirectUrl) {
+            window.location.href = redirectUrl;
+        }
         
     } catch (error) {
         console.error('Authentication error:', error);
         showToast(error.message || 'Authentication failed', true);
         clearAuthData();
+        throw error;
     }
 }
 
@@ -154,16 +168,11 @@ function clearAuthData() {
 // Handle logout
 function handleLogout() {
     if (confirm('Are you sure you want to log out?')) {
-        localStorage.removeItem('discord_token');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('roles');
-        localStorage.removeItem('has_access');
-        
+        clearAuthData();
         updateLoginState();
         updateRestrictedNav();
-        
         showToast('Successfully logged out');
-        setTimeout(() => window.location.reload(), 1000);
+        window.location.reload();
     }
 }
 
@@ -178,7 +187,6 @@ function updateRestrictedNav() {
         item.style.display = (token && hasAccess) ? 'block' : 'none';
     });
     
-    // We'll get the creator role from the server response
     const restrictedCreateItems = document.querySelectorAll('.restricted-create');
     const hasCreatorRole = userRoles.includes(localStorage.getItem('creator_role'));
     restrictedCreateItems.forEach(item => {

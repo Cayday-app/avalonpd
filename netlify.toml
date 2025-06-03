@@ -4,11 +4,7 @@
 
 [functions]
   directory = "netlify/functions"
-
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/*"
@@ -22,6 +18,7 @@
 [dev]
   framework = "#static"
   port = 8888
+  targetPort = 3999
   debug = true
 
 # Explicitly disable all plugins 
