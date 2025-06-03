@@ -78,7 +78,11 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+        console.log('Auth data loaded:', authData); // Debug log
+        
         const isHR = authData.user?.roles?.includes('1363771721177628692');
+        console.log('Is HR:', isHR); // Debug log
+        
         const formContainer = document.getElementById('update-form-container');
         const hrMessage = document.getElementById('hr-only-message');
         
@@ -120,6 +124,9 @@
                     }
                 };
 
+                console.log('Submitting update:', data); // Debug log
+                console.log('Auth token:', authData.token); // Debug log
+
                 const res = await fetch('/.netlify/functions/updates', {
                     method: 'POST',
                     headers: {
@@ -129,7 +136,19 @@
                     body: JSON.stringify(data)
                 });
 
-                const result = await res.json();
+                console.log('Response status:', res.status); // Debug log
+                
+                // Try to get response text first
+                const responseText = await res.text();
+                console.log('Response text:', responseText); // Debug log
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse response:', parseError);
+                    throw new Error('Server returned invalid response format');
+                }
 
                 if (res.ok) {
                     formMsg.textContent = 'Update created successfully!';
@@ -144,7 +163,7 @@
                     throw new Error(result.message || 'Failed to create update');
                 }
             } catch (err) {
-                console.error('Error:', err);
+                console.error('Error details:', err);
                 formMsg.textContent = err.message || 'Network error. Please try again.';
                 formMsg.style.color = '#ff3b3b';
             }
