@@ -57,6 +57,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
+    background: transparent;
 }
 
 .nav-links {
@@ -1966,7 +1967,7 @@ footer {
     max-width: 1200px;
     margin: 0 auto;
     padding: 4rem 20px;
-    background: var(--background);
+    background: transparent;
 }
 
 .division-section {
