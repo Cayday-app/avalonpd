@@ -85,20 +85,23 @@
 
     document.getElementById('update-form').addEventListener('submit', async e => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = {
-            title: formData.get('title'),
-            date: formData.get('date'),
-            image: formData.get('image'),
-            description: formData.get('description'),
-            creator: {
-                username: userData.username,
-                avatar: userData.avatar
-            },
-            timestamp: new Date().toISOString()
-        };
-
+        const formMsg = document.getElementById('form-msg');
+        formMsg.textContent = 'Submitting...';
+        
         try {
+            const formData = new FormData(e.target);
+            const data = {
+                title: formData.get('title'),
+                date: formData.get('date'),
+                image: formData.get('image'),
+                description: formData.get('description'),
+                creator: {
+                    username: userData.username,
+                    avatar: userData.avatar
+                },
+                timestamp: new Date().toISOString()
+            };
+
             const res = await fetch('/.netlify/functions/updates', {
                 method: 'POST',
                 headers: {
@@ -108,9 +111,11 @@
                 body: JSON.stringify(data)
             });
 
+            const result = await res.json();
+
             if (res.ok) {
-                document.getElementById('form-msg').textContent = 'Update created successfully!';
-                document.getElementById('form-msg').style.color = 'var(--accent)';
+                formMsg.textContent = 'Update created successfully!';
+                formMsg.style.color = 'var(--accent)';
                 e.target.reset();
                 
                 // Redirect to updates page after 2 seconds
@@ -118,14 +123,12 @@
                     window.location.href = '/updates.html';
                 }, 2000);
             } else {
-                const error = await res.json();
-                document.getElementById('form-msg').textContent = error.message || 'Failed to create update.';
-                document.getElementById('form-msg').style.color = '#ff3b3b';
+                throw new Error(result.message || 'Failed to create update');
             }
         } catch (err) {
-            console.error('Error creating update:', err);
-            document.getElementById('form-msg').textContent = 'Network error. Please try again.';
-            document.getElementById('form-msg').style.color = '#ff3b3b';
+            console.error('Error:', err);
+            formMsg.textContent = err.message || 'Network error. Please try again.';
+            formMsg.style.color = '#ff3b3b';
         }
     });
     </script>
