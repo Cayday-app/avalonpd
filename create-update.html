@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APD Portal - Create Announcement</title>
+    <title>APD Portal - Create Update</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -40,96 +42,113 @@
     </nav>
 
     <div class="create-update-container">
-        <!-- Creator Profile Preview -->
-        <div class="create-profile">
-            <img src="" alt="Your Avatar" class="create-avatar" />
-            <span class="create-username"></span>
+        <div id="hr-only-message" style="display: none;">
+            <h2>HR Access Only</h2>
+            <p>You need HR permissions to create updates. Please contact an administrator if you believe this is an error.</p>
         </div>
-        <h2>Create Announcement</h2>
-        <form id="update-form">
-            <label for="title">Title</label>
-            <input type="text" id="title" name="title" required>
 
-            <label for="date">Date</label>
-            <input type="date" id="date" name="date" required>
+        <div id="update-form-container">
+            <div class="create-profile">
+                <img src="" alt="Your Avatar" class="create-avatar" />
+                <span class="create-username"></span>
+            </div>
+            <h2>Create Update</h2>
+            <form id="update-form">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" required>
 
-            <label for="image">Image URL (optional)</label>
-            <input type="text" id="image" name="image" placeholder="Optional: image URL">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required>
 
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="5" required></textarea>
+                <label for="image">Image URL (optional)</label>
+                <input type="text" id="image" name="image" placeholder="Optional: image URL">
 
-            <button type="submit">Publish</button>
-            <input type="hidden" id="creatorAvatar" name="creatorAvatar">
-            <input type="hidden" id="creatorUsername" name="creatorUsername">
-        </form>
-        <div id="form-msg" style="margin-top:1rem;color:var(--accent);"></div>
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" required></textarea>
+
+                <button type="submit">Publish</button>
+                <input type="hidden" id="creatorAvatar" name="creatorAvatar">
+                <input type="hidden" id="creatorUsername" name="creatorUsername">
+            </form>
+            <div id="form-msg" style="margin-top:1rem;color:var(--accent);"></div>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="auth.js"></script>
     <script>
-    // Populate creator info from session storage
-    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
-    const userData = authData.user || {};
-    
-    // Populate hidden fields and profile preview
-    document.getElementById('creatorAvatar').value = userData.avatar || '';
-    document.getElementById('creatorUsername').value = userData.username || '';
-    
-    if (userData.username) {
-        const avatarEl = document.querySelector('.create-avatar');
-        const usernameEl = document.querySelector('.create-username');
-        avatarEl.src = userData.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
-        usernameEl.textContent = userData.username;
-    }
-
-    document.getElementById('update-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const formMsg = document.getElementById('form-msg');
-        formMsg.textContent = 'Submitting...';
+    document.addEventListener('DOMContentLoaded', function() {
+        const authData = JSON.parse(localStorage.getItem('discord_auth') || '{}');
+        const isHR = authData.user?.roles?.includes('1363771721177628692');
+        const formContainer = document.getElementById('update-form-container');
+        const hrMessage = document.getElementById('hr-only-message');
         
-        try {
-            const formData = new FormData(e.target);
-            const data = {
-                title: formData.get('title'),
-                date: formData.get('date'),
-                image: formData.get('image'),
-                description: formData.get('description'),
-                creator: {
-                    username: userData.username,
-                    avatar: userData.avatar
-                },
-                timestamp: new Date().toISOString()
-            };
-
-            const res = await fetch('/.netlify/functions/updates', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `${authData.tokenType} ${authData.token}`
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await res.json();
-
-            if (res.ok) {
-                formMsg.textContent = 'Update created successfully!';
-                formMsg.style.color = 'var(--accent)';
-                e.target.reset();
-                
-                // Redirect to updates page after 2 seconds
-                setTimeout(() => {
-                    window.location.href = '/updates.html';
-                }, 2000);
-            } else {
-                throw new Error(result.message || 'Failed to create update');
-            }
-        } catch (err) {
-            console.error('Error:', err);
-            formMsg.textContent = err.message || 'Network error. Please try again.';
-            formMsg.style.color = '#ff3b3b';
+        // Show/hide form based on HR role
+        if (!isHR) {
+            formContainer.style.display = 'none';
+            hrMessage.style.display = 'block';
+            return;
         }
+
+        // Populate creator info
+        const userData = authData.user || {};
+        document.getElementById('creatorAvatar').value = userData.avatar || '';
+        document.getElementById('creatorUsername').value = userData.username || '';
+        
+        if (userData.username) {
+            const avatarEl = document.querySelector('.create-avatar');
+            const usernameEl = document.querySelector('.create-username');
+            avatarEl.src = userData.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+            usernameEl.textContent = userData.username;
+        }
+
+        // Handle form submission
+        document.getElementById('update-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const formMsg = document.getElementById('form-msg');
+            formMsg.textContent = 'Submitting...';
+            
+            try {
+                const formData = new FormData(e.target);
+                const data = {
+                    title: formData.get('title'),
+                    date: formData.get('date'),
+                    image: formData.get('image'),
+                    description: formData.get('description'),
+                    creator: {
+                        username: userData.username,
+                        avatar: userData.avatar
+                    }
+                };
+
+                const res = await fetch('/.netlify/functions/updates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `${authData.tokenType} ${authData.token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    formMsg.textContent = 'Update created successfully!';
+                    formMsg.style.color = 'var(--accent)';
+                    e.target.reset();
+                    
+                    // Redirect to updates page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/updates.html';
+                    }, 2000);
+                } else {
+                    throw new Error(result.message || 'Failed to create update');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                formMsg.textContent = err.message || 'Network error. Please try again.';
+                formMsg.style.color = '#ff3b3b';
+            }
+        });
     });
     </script>
 </body>

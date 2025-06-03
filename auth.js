@@ -365,13 +365,8 @@ async function handleAuthToken(accessToken, tokenType) {
                 'Authorization': `${tokenType} ${accessToken}`
             }
         });
-        
-        if (!userResponse.ok) {
-            throw new Error('Failed to fetch user data');
-        }
-        
         const userData = await userResponse.json();
-        console.log('User data:', userData); // Debug log
+        console.log('User data:', userData);
 
         // Fetch user's guild member data
         const guildId = '1363747433074655433'; // APD server ID
@@ -380,43 +375,38 @@ async function handleAuthToken(accessToken, tokenType) {
                 'Authorization': `${tokenType} ${accessToken}`
             }
         });
-
-        if (!memberResponse.ok) {
-            throw new Error('Failed to fetch guild member data');
-        }
-
         const memberData = await memberResponse.json();
-        console.log('Member data:', memberData); // Debug log
+        console.log('Member data:', memberData);
 
-        // Store auth data with expiration
+        // Store auth data
         const authData = {
             token: accessToken,
             tokenType: tokenType,
             user: {
                 ...userData,
                 roles: memberData.roles || [],
-                avatar: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : null
-            },
-            expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days from now
+                avatar: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png',
+                username: userData.username
+            }
         };
+
+        console.log('Storing auth data:', authData);
+        localStorage.setItem('discord_auth', JSON.stringify(authData));
         
-        console.log('Auth data being stored:', authData); // Debug log
-        setCookie('discord_auth', JSON.stringify(authData), 7);
-        
-        // Update UI
-        updateLoginState(authData);
-        updateRestrictedNav(authData);
+        // Update UI immediately
+        updateLoginState();
+        updateRestrictedNav();
         
         // Show success message
         showToast('Successfully logged in!');
         
         // Redirect back to original page
-        const redirectUrl = getCookie('login_redirect') || '/';
-        deleteCookie('login_redirect');
+        const redirectUrl = localStorage.getItem('login_redirect') || '/';
+        localStorage.removeItem('login_redirect');
         window.location.href = redirectUrl;
     } catch (error) {
         console.error('Auth error:', error);
         showToast('Authentication failed. Please try again.', true);
-        handleLogout();
+        window.location.href = '/';
     }
 } 
