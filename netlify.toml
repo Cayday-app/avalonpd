@@ -8,10 +8,14 @@
 
 # Redirect all routes to index.html for client-side routing
 [[redirects]]
+  from = "/auth/callback"
+  to = "/auth/callback/index.html"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
 
 [[redirects]]
   from = "/api/*"
@@ -37,6 +41,9 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
     Cache-Control = "no-cache"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Content-Security-Policy = "default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; connect-src 'self' https://discord.com/api/ https://*.discord.com/api/;"
 
 [[headers]]
   for = "/*.css"
