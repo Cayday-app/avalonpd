@@ -11,6 +11,11 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 [build.environment]
   NODE_VERSION = "18"
   AWS_LAMBDA_JS_RUNTIME = "nodejs18.x"
@@ -20,5 +25,12 @@
   port = 8888
   targetPort = 3999
   debug = true
+
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
 
 # Explicitly disable all plugins 

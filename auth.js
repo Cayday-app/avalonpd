@@ -66,10 +66,11 @@ function updateLoginState() {
 
 // Handle Discord auth
 function handleDiscordAuth() {
-    const clientId = '1363747847039881347';
+    // Get environment variables from window.ENV (injected by Netlify)
+    const clientId = window.ENV?.DISCORD_CLIENT_ID || '1363747847039881347';
     const redirectUri = window.location.origin;
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
-    const guildId = '1363747433074655433';
+    const guildId = window.ENV?.DISCORD_GUILD_ID || '1363747433074655433';
     
     // Save the current URL to return to after login
     localStorage.setItem('login_redirect', window.location.href);
@@ -309,4 +310,37 @@ function darkenColor(color, percent) {
     const BB = ((B.toString(16).length === 1) ? '0' + B.toString(16) : B.toString(16));
 
     return '#' + RR + GG + BB;
-} 
+}
+
+// Debug helper function
+function debugAuth() {
+    const debugInfo = {
+        token: localStorage.getItem('discord_token') ? 'Present' : 'Not present',
+        userData: JSON.parse(localStorage.getItem('user_data') || '{}'),
+        roles: JSON.parse(localStorage.getItem('roles') || '[]'),
+        hasAccess: localStorage.getItem('has_access'),
+        creatorRole: localStorage.getItem('creator_role'),
+        currentUrl: window.location.href,
+        redirectUri: window.location.origin,
+        clientId: window.ENV?.DISCORD_CLIENT_ID || '1363747847039881347',
+        guildId: window.ENV?.DISCORD_GUILD_ID || '1363747433074655433'
+    };
+
+    console.log('Auth Debug Info:', debugInfo);
+    return debugInfo;
+}
+
+// Add debug button to debug panel
+document.addEventListener('DOMContentLoaded', function() {
+    const debugPanel = document.getElementById('debug-panel');
+    if (debugPanel) {
+        const debugAuthBtn = document.createElement('button');
+        debugAuthBtn.textContent = 'Debug Auth';
+        debugAuthBtn.style.marginLeft = '10px';
+        debugAuthBtn.onclick = () => {
+            const info = debugAuth();
+            document.getElementById('debug-info').innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+        };
+        document.getElementById('check-config').after(debugAuthBtn);
+    }
+}); 
