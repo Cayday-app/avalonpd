@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticating... - APD Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .redirect-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            background: var(--background);
+        }
+        .redirect-container img {
+            height: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .redirect-container p {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: var(--text);
+        }
+        .redirect-container h1 {
+            color: var(--text);
+        }
+        .error-message {
+            color: #ff4444;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <img src="/apdlogo.png" alt="APD Logo">
+        <h1>Authenticating...</h1>
+        <p>Please wait while we complete your authentication.</p>
+    </div>
+
+    <script>
+        // Function to show error message
+        function showError(message) {
+            document.querySelector('.redirect-container').innerHTML = `
+                <img src="/apdlogo.png" alt="APD Logo">
+                <h1>Authentication Failed</h1>
+                <p class="error-message">${message}</p>
+                <a href="/" class="login-btn" style="margin-top: 20px;">Return Home</a>
+            `;
+        }
+
+        // Function to fetch user data from Discord
+        async function fetchDiscordUserData(accessToken) {
+            try {
+                console.log('Fetching user data...');
+                // Fetch user data
+                const userResponse = await fetch('https://discord.com/api/users/@me', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!userResponse.ok) {
+                    throw new Error('Failed to fetch user data: ' + await userResponse.text());
+                }
+
+                const userData = await userResponse.json();
+                console.log('User data received:', userData);
+
+                // Fetch guild member data
+                const guildResponse = await fetch('https://discord.com/api/users/@me/guilds/1363747433074655433/member', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!guildResponse.ok) {
+                    throw new Error('Failed to fetch guild data: ' + await guildResponse.text());
+                }
+
+                const guildData = await guildResponse.json();
+                console.log('Guild data received:', guildData);
+
+                return {
+                    id: userData.id,
+                    username: userData.username,
+                    discriminator: userData.discriminator,
+                    avatar: userData.avatar ? 
+                        `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 
+                        'https://cdn.discordapp.com/embed/avatars/0.png',
+                    roles: guildData.roles || []
+                };
+            } catch (error) {
+                console.error('Error fetching Discord data:', error);
+                throw error;
+            }
+        }
+
+        // Main authentication handler
+        async function handleAuthentication() {
+            try {
+                console.log('Starting authentication...');
+                // Get the token from the URL hash
+                const fragment = new URLSearchParams(window.location.hash.slice(1));
+                const accessToken = fragment.get('access_token');
+                const tokenType = fragment.get('token_type');
+                const expiresIn = fragment.get('expires_in');
+                const scope = fragment.get('scope');
+
+                if (!accessToken) {
+                    throw new Error('No access token found in URL');
+                }
+
+                console.log('Token received, fetching user data...');
+                // Fetch user data from Discord
+                const userData = await fetchDiscordUserData(accessToken);
+                console.log('User data processed:', userData);
+
+                // Store complete auth data
+                const authData = {
+                    access_token: accessToken,
+                    token_type: tokenType,
+                    expires_in: parseInt(expiresIn),
+                    scope: scope,
+                    timestamp: Date.now(),
+                    user: userData
+                };
+
+                // Store in session storage
+                sessionStorage.setItem('discord_auth', JSON.stringify(authData));
+                console.log('Auth data stored, redirecting...');
+
+                // Get redirect URL or default to home
+                const redirectUrl = sessionStorage.getItem('login_redirect') || '/';
+                sessionStorage.removeItem('login_redirect');
+
+                // Redirect back to the site
+                window.location.href = redirectUrl;
+            } catch (error) {
+                console.error('Authentication error:', error);
+                showError(error.message || 'Authentication failed. Please try again.');
+            }
+        }
+
+        // Start the authentication process when the page loads
+        window.onload = handleAuthentication;
+    </script>
+</body>
+</html> 
