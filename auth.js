@@ -289,4 +289,55 @@ if (window.location.pathname === '/auth/callback') {
         console.error('No access token found in URL');
         window.location.href = '/';
     }
+}
+
+// Handle auth token and fetch user data
+async function handleAuthToken(accessToken, tokenType) {
+    try {
+        // Fetch user data
+        const userResponse = await fetch('https://discord.com/api/users/@me', {
+            headers: {
+                'Authorization': `${tokenType} ${accessToken}`
+            }
+        });
+        const userData = await userResponse.json();
+
+        // Fetch user's guild member data
+        const guildId = '1363747433074655433'; // APD server ID
+        const memberResponse = await fetch(`https://discord.com/api/users/@me/guilds/${guildId}/member`, {
+            headers: {
+                'Authorization': `${tokenType} ${accessToken}`
+            }
+        });
+        const memberData = await memberResponse.json();
+
+        // Store auth data
+        const authData = {
+            token: accessToken,
+            tokenType: tokenType,
+            user: {
+                ...userData,
+                roles: memberData.roles || [],
+                avatar: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : null
+            }
+        };
+        
+        sessionStorage.setItem('discord_auth', JSON.stringify(authData));
+        
+        // Update UI
+        updateLoginState();
+        updateRestrictedNav();
+        
+        // Show success message
+        showToast('Successfully logged in!');
+        
+        // Redirect back to original page
+        const redirectUrl = sessionStorage.getItem('login_redirect') || '/';
+        sessionStorage.removeItem('login_redirect');
+        window.location.href = redirectUrl;
+    } catch (error) {
+        console.error('Auth error:', error);
+        showToast('Authentication failed. Please try again.', true);
+        window.location.href = '/';
+    }
 } 

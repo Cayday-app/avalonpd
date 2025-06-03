@@ -127,18 +127,23 @@
 <body>
     <nav>
         <div class="nav-container">
-            <a href="index.html"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
-            <a href="index.html">HOME</a>
-            <a href="coc.html" class="active">COC</a>
-            <a href="restricted.html" class="restricted-nav">ROSTER</a>
-            <a href="sop.html" class="restricted-nav">SOP</a>
-            <a href="department-group.html" class="restricted-nav">GROUP</a>
-            <a href="shift-logging.html" class="restricted-nav">SHIFT LOG</a>
-            <a href="officer-chat.html" class="restricted-nav">LIVE CHAT</a>
-            <a href="create-update.html" class="restricted-create">CREATE UPDATE</a>
-            <a href="updates.html">UPDATES</a>
+            <div class="nav-links">
+                <a href="/"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+                <a href="/">HOME</a>
+                <a href="/coc.html">COC</a>
+                <a href="/roster.html" class="restricted-nav">ROSTER</a>
+                <a href="/sop.html" class="restricted-nav">SOP</a>
+                <a href="/group.html" class="restricted-nav">GROUP</a>
+                <a href="/shift-log.html" class="restricted-nav">SHIFT LOG</a>
+                <a href="/wanted.html">WANTED</a>
+                <a href="/create-update.html" class="restricted-create">CREATE UPDATE</a>
+                <a href="/updates.html">UPDATES</a>
+            </div>
             <div class="nav-icons">
-                <button onclick="handleDiscordAuth()" class="login-btn">LOGIN WITH DISCORD</button>
+                <button onclick="handleDiscordAuth()" class="login-btn">
+                    <i class="fab fa-discord"></i>
+                    LOGIN WITH DISCORD
+                </button>
             </div>
         </div>
     </nav>
