@@ -1,6 +1,6 @@
 // Auth handling
 document.addEventListener('DOMContentLoaded', function() {
-    // Always check auth state on page load
+    // Initialize auth
     initializeAuth();
 });
 
@@ -21,34 +21,14 @@ function deleteCookie(name) {
 }
 
 function initializeAuth() {
-    try {
-        // Check if we have auth data in cookies
-        const authData = getCookie('discord_auth') ? JSON.parse(getCookie('discord_auth')) : null;
-        console.log('Auth data on init:', authData); // Debug log
-        
-        if (authData && authData.user) {
-            // Validate token expiration
-            const now = Date.now();
-            if (authData.expiresAt && now < authData.expiresAt) {
-                // Token is still valid
-                console.log('Token valid, updating UI'); // Debug log
-                updateLoginState(authData);
-                updateRestrictedNav(authData);
-            } else {
-                // Token expired, clear auth
-                console.log('Token expired, logging out'); // Debug log
-                handleLogout();
-            }
-        } else {
-            // No auth data, ensure logged out state
-            console.log('No auth data, resetting UI'); // Debug log
-            updateLoginState(null);
-            updateRestrictedNav(null);
-        }
-    } catch (error) {
-        console.error('Init auth error:', error);
-        handleLogout();
-    }
+    // Check if we have auth data
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    
+    // Update UI based on login state
+    updateLoginState();
+    
+    // Update restricted nav visibility
+    updateRestrictedNav();
     
     // Hide loading overlay
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -63,40 +43,27 @@ function initializeAuth() {
 }
 
 // Update login button and user state
-function updateLoginState(authData = null) {
-    try {
-        if (!authData) {
-            authData = getCookie('discord_auth') ? JSON.parse(getCookie('discord_auth')) : null;
+function updateLoginState() {
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const loginBtn = document.querySelector('.login-btn');
+    
+    if (loginBtn) {
+        if (authData.user) {
+            // User is logged in
+            loginBtn.innerHTML = `
+                <img src="${authData.user.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+                    alt="${authData.user.username}" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
+                ${authData.user.username}
+            `;
+            loginBtn.onclick = handleLogout;
+        } else {
+            // User is not logged in
+            loginBtn.innerHTML = `
+                <i class="fab fa-discord"></i>
+                LOGIN WITH DISCORD
+            `;
+            loginBtn.onclick = handleDiscordAuth;
         }
-        
-        const loginBtn = document.querySelector('.login-btn');
-        console.log('Updating login state:', authData?.user); // Debug log
-        
-        if (loginBtn) {
-            if (authData?.user) {
-                // User is logged in
-                const avatarUrl = authData.user.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
-                const username = authData.user.username || 'User';
-                
-                loginBtn.innerHTML = `
-                    <img src="${avatarUrl}" 
-                        alt="${username}" 
-                        style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
-                    ${username}
-                `;
-                loginBtn.onclick = handleLogout;
-            } else {
-                // User is not logged in
-                loginBtn.innerHTML = `
-                    <i class="fab fa-discord"></i>
-                    LOGIN WITH DISCORD
-                `;
-                loginBtn.onclick = handleDiscordAuth;
-            }
-        }
-    } catch (error) {
-        console.error('Update login state error:', error);
-        handleLogout();
     }
 }
 
@@ -123,7 +90,7 @@ function handleDiscordAuth() {
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=token` + // Using implicit grant flow
+        `&response_type=token` +
         `&scope=${scopes}` +
         `&state=${state}` +
         `&prompt=consent`;
@@ -133,62 +100,37 @@ function handleDiscordAuth() {
 
 // Handle logout
 function handleLogout() {
-    try {
-        // Clear auth data
-        deleteCookie('discord_auth');
-        
-        // Update UI
-        updateLoginState(null);
-        updateRestrictedNav(null);
-        
-        // Show toast
-        showToast('Successfully logged out!');
-        
-        // Redirect to home if on a restricted page
-        const restrictedPages = ['/roster.html', '/sop.html', '/group.html', '/shift-log.html'];
-        if (restrictedPages.includes(window.location.pathname)) {
-            window.location.href = '/';
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-        // Force clear cookie and reload page
-        deleteCookie('discord_auth');
-        window.location.reload();
+    // Clear auth data
+    sessionStorage.removeItem('discord_auth');
+    
+    // Update UI
+    updateLoginState();
+    updateRestrictedNav();
+    
+    // Show toast
+    showToast('Successfully logged out!');
+    
+    // Redirect to home if on a restricted page
+    const restrictedPages = ['/roster.html', '/sop.html', '/group.html', '/shift-log.html'];
+    if (restrictedPages.includes(window.location.pathname)) {
+        window.location.href = '/';
     }
 }
 
 // Update restricted navigation visibility
-function updateRestrictedNav(authData = null) {
-    try {
-        if (!authData) {
-            authData = getCookie('discord_auth') ? JSON.parse(getCookie('discord_auth')) : null;
-        }
-        
-        const restrictedCreate = document.querySelectorAll('.restricted-create');
-        const editButtons = document.querySelectorAll('.edit-btn');
-        
-        console.log('Current auth data:', authData); // Debug log
-        
-        // Check if user has HR role
-        const isHR = authData?.user?.roles?.includes('1363771721177628692'); // HR role
-        console.log('Is HR:', isHR); // Debug log
-        
-        // Update visibility
-        restrictedCreate.forEach(nav => {
-            nav.style.display = isHR ? 'inline-block' : 'none';
-        });
-        
-        // Update edit button visibility
-        editButtons.forEach(btn => {
-            btn.style.display = isHR ? 'block' : 'none';
-        });
-    } catch (error) {
-        console.error('Update restricted nav error:', error);
-        // Hide all restricted elements on error
-        document.querySelectorAll('.restricted-create, .edit-btn').forEach(el => {
-            el.style.display = 'none';
-        });
-    }
+function updateRestrictedNav() {
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const restrictedCreate = document.querySelectorAll('.restricted-create');
+    
+    // Check if user has HR role
+    const isHR = authData.user?.roles?.includes('1363771721177628692'); // HR role
+    console.log('Auth data:', authData);
+    console.log('Is HR:', isHR);
+    
+    // Update visibility
+    restrictedCreate.forEach(nav => {
+        nav.style.display = isHR ? 'inline-block' : 'none';
+    });
 }
 
 // Toast notification
@@ -389,11 +331,11 @@ async function handleAuthToken(accessToken, tokenType) {
                 username: userData.username
             }
         };
-
-        console.log('Storing auth data:', authData);
-        localStorage.setItem('discord_auth', JSON.stringify(authData));
         
-        // Update UI immediately
+        console.log('Storing auth data:', authData);
+        sessionStorage.setItem('discord_auth', JSON.stringify(authData));
+        
+        // Update UI
         updateLoginState();
         updateRestrictedNav();
         
@@ -401,8 +343,8 @@ async function handleAuthToken(accessToken, tokenType) {
         showToast('Successfully logged in!');
         
         // Redirect back to original page
-        const redirectUrl = localStorage.getItem('login_redirect') || '/';
-        localStorage.removeItem('login_redirect');
+        const redirectUrl = sessionStorage.getItem('login_redirect') || '/';
+        sessionStorage.removeItem('login_redirect');
         window.location.href = redirectUrl;
     } catch (error) {
         console.error('Auth error:', error);
