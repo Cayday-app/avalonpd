@@ -23,10 +23,10 @@ function deleteCookie(name) {
 // Role definitions
 const ROLES = {
     HR: '1363771721177628692',
-    OFFICER: '1363747433074655434', // Officer role
-    COMMAND: '1363747433074655435', // Command role
-    DETECTIVE: '1363747433074655436', // Detective role
-    FTO: '1363747433074655437' // FTO role
+    OFFICER: '1363749144266674267', // Updated correct Officer role
+    COMMAND: '1363747433074655435',  // Keep other roles for future use
+    DETECTIVE: '1363747433074655436',
+    FTO: '1363747433074655437'
 };
 
 // Check if user has any of the specified roles
