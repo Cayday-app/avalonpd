@@ -15,18 +15,17 @@
     box-sizing: border-box;
 }
 
-html, body {
-    height: 100%;
-    width: 100%;
-    font-family: 'Inter', sans-serif;
-    line-height: 1.6;
+html {
     background-color: var(--background);
-    color: var(--text);
 }
 
 body {
-    padding-top: 60px;
     min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background-color: var(--background);
+    padding-top: 60px;
     display: flex;
     flex-direction: column;
 }
@@ -1928,7 +1927,7 @@ footer {
 
 /* Division page styles */
 .division-header {
-    height: 400px;
+    min-height: 400px;
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
     background-size: cover;
     background-position: center;
@@ -1937,7 +1936,7 @@ footer {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 0 20px;
+    padding: 4rem 20px;
 }
 
 .division-header h1 {
@@ -1959,6 +1958,7 @@ footer {
     max-width: 1200px;
     margin: 0 auto;
     padding: 4rem 20px;
+    width: 100%;
 }
 
 .division-section {
@@ -1970,16 +1970,16 @@ footer {
 }
 
 .division-section h2 {
-    font-size: 2rem;
     color: var(--accent);
+    font-size: 2rem;
     margin-bottom: 1.5rem;
 }
 
 .division-section p {
+    color: var(--text);
     font-size: 1.1rem;
     line-height: 1.7;
-    color: var(--text);
-    opacity: 0.9;
+    margin-bottom: 1.5rem;
 }
 
 .division-section ul {
@@ -1988,12 +1988,11 @@ footer {
 }
 
 .division-section ul li {
-    position: relative;
-    padding-left: 1.5rem;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
     color: var(--text);
-    opacity: 0.9;
+    font-size: 1.1rem;
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
 }
 
 .division-section ul li::before {
@@ -2001,7 +2000,6 @@ footer {
     color: var(--accent);
     position: absolute;
     left: 0;
-    top: 0;
 }
 
 .leadership-grid {
