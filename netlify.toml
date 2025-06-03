@@ -11,14 +11,12 @@
   from = "/auth/callback"
   to = "/callback.html"
   status = 200
-  force = true
 
 # Then handle all other routes
 [[redirects]]
   from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/*"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/*"
