@@ -78,22 +78,20 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
-        console.log('Auth data loaded:', authData); // Debug log
+        console.log('Auth data loaded:', authData);
         
         const isHR = authData.user?.roles?.includes('1363771721177628692');
-        console.log('Is HR:', isHR); // Debug log
+        console.log('Is HR:', isHR);
         
         const formContainer = document.getElementById('update-form-container');
         const hrMessage = document.getElementById('hr-only-message');
         
-        // Show/hide form based on HR role
         if (!isHR) {
             formContainer.style.display = 'none';
             hrMessage.style.display = 'block';
             return;
         }
 
-        // Populate creator info
         const userData = authData.user || {};
         document.getElementById('creatorAvatar').value = userData.avatar || '';
         document.getElementById('creatorUsername').value = userData.username || '';
@@ -105,7 +103,6 @@
             usernameEl.textContent = userData.username;
         }
 
-        // Handle form submission
         document.getElementById('update-form').addEventListener('submit', async e => {
             e.preventDefault();
             const formMsg = document.getElementById('form-msg');
@@ -124,10 +121,17 @@
                     }
                 };
 
-                console.log('Submitting update:', data); // Debug log
-                console.log('Auth token:', authData.token); // Debug log
+                // First check if function is available
+                const checkResponse = await fetch('/.netlify/functions/updates', {
+                    method: 'HEAD'
+                });
 
-                const res = await fetch('/api/updates', {
+                if (checkResponse.status === 404) {
+                    throw new Error('Update function not found. Please check server configuration.');
+                }
+
+                // Submit the update
+                const res = await fetch('/.netlify/functions/updates', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -136,35 +140,32 @@
                     body: JSON.stringify(data)
                 });
 
-                console.log('Response status:', res.status); // Debug log
-                
-                // Try to get response text first
-                const responseText = await res.text();
-                console.log('Response text:', responseText); // Debug log
-                
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('Failed to parse response:', parseError);
-                    throw new Error('Server returned invalid response format');
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Server response:', errorText);
+                    throw new Error(res.status === 404 ? 'Update function not found' : 'Failed to create update');
                 }
 
-                if (res.ok) {
-                    formMsg.textContent = 'Update created successfully!';
-                    formMsg.style.color = 'var(--accent)';
-                    e.target.reset();
-                    
-                    // Redirect to updates page after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = '/updates.html';
-                    }, 2000);
-                } else {
-                    throw new Error(result.message || 'Failed to create update');
+                let result;
+                try {
+                    const responseText = await res.text();
+                    console.log('Raw response:', responseText);
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Parse error:', parseError);
+                    throw new Error('Invalid response from server');
                 }
+
+                formMsg.textContent = 'Update created successfully!';
+                formMsg.style.color = 'var(--accent)';
+                e.target.reset();
+                
+                setTimeout(() => {
+                    window.location.href = '/updates.html';
+                }, 2000);
             } catch (err) {
                 console.error('Error details:', err);
-                formMsg.textContent = err.message || 'Network error. Please try again.';
+                formMsg.textContent = err.message || 'Failed to create update. Please try again.';
                 formMsg.style.color = '#ff3b3b';
             }
         });
