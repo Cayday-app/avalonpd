@@ -1,3 +1,4 @@
+/* Base theme variables */
 :root {
     --primary: #1a1a1a;
     --accent: #3498db;
@@ -7,6 +8,7 @@
     --blue-light: #4d94ff;
 }
 
+/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -14,12 +16,20 @@
     transition: all 0.3s ease;
 }
 
-body {
+html, body {
+    height: 100%;
+    width: 100%;
     font-family: 'Inter', sans-serif;
     line-height: 1.6;
     background-color: var(--background);
     color: var(--text);
+}
+
+body {
     padding-top: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 nav {

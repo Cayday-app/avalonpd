@@ -5,7 +5,7 @@ const config = {
         guildId: '1363747433074655433',
         requiredRoles: ['1363749144266674267'],
         creatorRole: '1363771721177628692', // HR-only role
-        redirectUri: 'https://avalonpd.netlify.app',
+        redirectUri: 'https://avalonpd.netlify.app/auth/callback',
         debug: true // Enable debug mode
     }
 };
@@ -167,13 +167,20 @@ document.addEventListener('DOMContentLoaded', () => {
 // Handle Discord Authentication
 function handleDiscordAuth() {
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
+    const state = Math.random().toString(36).substring(7); // Generate random state
+    
+    // Store state in localStorage for verification
+    localStorage.setItem('discord_auth_state', state);
+    
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${config.discord.clientId}` +
         `&redirect_uri=${encodeURIComponent(config.discord.redirectUri)}` +
         `&response_type=token` +
         `&scope=${scopes}` +
+        `&state=${state}` +
         `&guild_id=${config.discord.guildId}` +
         `&prompt=consent`;
+    
     debugLog('Auth URL:', authUrl);
     window.location.href = authUrl;
 }
@@ -182,6 +189,17 @@ function handleDiscordAuth() {
 async function handleAuthToken(accessToken, tokenType) {
     try {
         showToast('Authenticating...');
+        
+        // Verify state to prevent CSRF attacks
+        const storedState = localStorage.getItem('discord_auth_state');
+        const urlState = new URLSearchParams(window.location.hash.slice(1)).get('state');
+        
+        if (!storedState || storedState !== urlState) {
+            throw new Error('Invalid state parameter');
+        }
+        
+        // Clear stored state
+        localStorage.removeItem('discord_auth_state');
         
         // Store the token
         localStorage.setItem('discord_token', accessToken);
@@ -222,15 +240,14 @@ async function handleAuthToken(accessToken, tokenType) {
         if (hasAccess) {
             unlockRestrictedContent();
             showToast('Access granted!');
+        } else {
+            showToast('No access to restricted content', true);
         }
         updatePrivileges();
         
         // Clean up URL
         window.history.replaceState({}, document.title, '/');
         showToast('Successfully logged in!');
-        
-        // Request notification permission after successful login
-        requestNotificationPermission();
         
     } catch (error) {
         console.error('Authentication error:', error);

@@ -11,7 +11,7 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  force = true
+  force = false
 
 [[redirects]]
   from = "/api/*"
@@ -24,9 +24,11 @@
 
 [dev]
   framework = "#static"
-  port = 8888
   targetPort = 3999
-  debug = true
+  port = 9000
+  publish = "."
+  autoLaunch = true
+  command = "npm run dev"
 
 [[headers]]
   for = "/*"
@@ -34,16 +36,24 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
+    Cache-Control = "no-cache"
 
 [[headers]]
   for = "/*.css"
     [headers.values]
-    Content-Type = "text/css"
+    Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/*.js"
     [headers.values]
-    Content-Type = "application/javascript"
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+    [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/*.png"

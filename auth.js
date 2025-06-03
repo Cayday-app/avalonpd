@@ -109,12 +109,10 @@ function generateState() {
 
 // Handle Discord auth
 function handleDiscordAuth() {
-    // Get environment variables from window.ENV (injected by Netlify)
-    const clientId = window.ENV?.DISCORD_CLIENT_ID || '1363747847039881347';
-    const baseUri = window.location.origin;
-    const redirectUri = `${baseUri}/auth/callback`;
+    const clientId = '1363747847039881347';
+    const redirectUri = 'https://avalonpd.netlify.app/auth/callback';
     const scopes = encodeURIComponent('identify guilds guilds.members.read');
-    const guildId = window.ENV?.DISCORD_GUILD_ID || '1363747433074655433';
+    const guildId = '1363747433074655433';
     
     // Generate and store state for CSRF protection
     const state = generateState();
@@ -131,10 +129,6 @@ function handleDiscordAuth() {
         `&state=${state}` +
         `&guild_id=${guildId}` +
         `&prompt=consent`;
-    
-    // Log the redirect URI for verification
-    console.log('Redirect URI:', redirectUri);
-    console.log('Full Auth URL:', authUrl);
     
     window.location.href = authUrl;
 }
@@ -379,8 +373,8 @@ function debugAuth() {
         creatorRole: localStorage.getItem('creator_role'),
         currentUrl: window.location.href,
         redirectUri: window.location.origin,
-        clientId: window.ENV?.DISCORD_CLIENT_ID || '1363747847039881347',
-        guildId: window.ENV?.DISCORD_GUILD_ID || '1363747433074655433'
+        clientId: '1363747847039881347',
+        guildId: '1363747433074655433'
     };
 
     console.log('Auth Debug Info:', debugInfo);
@@ -400,4 +394,17 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         document.getElementById('check-config').after(debugAuthBtn);
     }
-}); 
+});
+
+// Handle the OAuth callback
+if (window.location.pathname === '/auth/callback') {
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
+    
+    if (accessToken) {
+        handleAuthToken(accessToken, tokenType);
+    } else {
+        console.error('No access token found in URL');
+        window.location.href = '/';
+    }
+} 

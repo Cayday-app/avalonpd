@@ -1,13 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APD Portal</title>
-    <link rel="stylesheet" href="/styles.css">
+    <!-- Base tag should be after meta tags -->
+    <base href="/">
+    <!-- Load external fonts first -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Load our CSS last -->
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <!-- Add critical styles inline to prevent FOUC -->
+    <style>
+        /* Critical styles to prevent flash of unstyled content */
+        body { 
+            opacity: 0; 
+            background: #0f0f0f;
+            margin: 0;
+            padding: 0;
+        }
+        body.loaded { 
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+    </style>
 </head>
 <body>
     <!-- Loading overlay -->
