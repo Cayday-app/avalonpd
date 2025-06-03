@@ -1,13 +1,6 @@
 [build]
   publish = "."
-  command = """
-    npm install && \
-    if [ -d "functions" ]; then \
-      cd functions && npm install; \
-    else \
-      echo "Error: functions directory not found" && exit 1; \
-    fi
-  """
+  command = "npm install && cd functions && npm install"
 
 [functions]
   directory = "functions"
