@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wanted Persons - APD Portal</title>
+    <title>APD - Wanted Persons</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -148,6 +148,15 @@
                 <a href="/"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
                 <a href="/">HOME</a>
                 <a href="/coc.html">COC</a>
+                <div class="dropdown">
+                    <a href="#">DIVISIONS</a>
+                    <div class="dropdown-content">
+                        <a href="/divisions/field-training.html">Field Training</a>
+                        <a href="/divisions/gang-narcotics.html">Gang & Narcotics</a>
+                        <a href="/divisions/detectives.html">Detectives Bureau</a>
+                        <a href="/divisions/community.html">Community Outreach</a>
+                    </div>
+                </div>
                 <a href="/roster.html" class="restricted-nav">ROSTER</a>
                 <a href="/sop.html" class="restricted-nav">SOP</a>
                 <a href="/group.html" class="restricted-nav">GROUP</a>
@@ -173,10 +182,11 @@
             </div>
             <div class="wanted-grid">
                 <div class="wanted-card">
+                    <button class="edit-btn" style="display: none;"><i class="fas fa-edit"></i></button>
                     <img src="wanted1.jpg" alt="Wanted Person 1" class="wanted-image">
                     <div class="wanted-info">
-                        <h2 class="wanted-name">John "Ghost" Doe</h2>
-                        <p class="wanted-description">Wanted for multiple armed robberies and evading police. Last seen in the Downtown district. Known to be armed and extremely dangerous.</p>
+                        <h2 class="wanted-name">John "The Ghost" Doe</h2>
+                        <p class="wanted-description">Wanted for multiple counts of grand theft auto and evading police.</p>
                         <div class="wanted-alert">
                             IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
                         </div>
@@ -184,10 +194,11 @@
                 </div>
 
                 <div class="wanted-card">
+                    <button class="edit-btn" style="display: none;"><i class="fas fa-edit"></i></button>
                     <img src="wanted2.jpg" alt="Wanted Person 2" class="wanted-image">
                     <div class="wanted-info">
-                        <h2 class="wanted-name">Sarah "Viper" Smith</h2>
-                        <p class="wanted-description">Wanted for cyber crimes and identity theft. Known to frequent internet cafes and tech hubs. Approach with extreme caution.</p>
+                        <h2 class="wanted-name">Sarah "Quicksilver" Smith</h2>
+                        <p class="wanted-description">Wanted for armed robbery and assault with a deadly weapon.</p>
                         <div class="wanted-alert">
                             IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
                         </div>
@@ -195,10 +206,11 @@
                 </div>
 
                 <div class="wanted-card">
+                    <button class="edit-btn" style="display: none;"><i class="fas fa-edit"></i></button>
                     <img src="wanted3.jpg" alt="Wanted Person 3" class="wanted-image">
                     <div class="wanted-info">
-                        <h2 class="wanted-name">Marcus "Shadow" Johnson</h2>
-                        <p class="wanted-description">Wanted for drug trafficking and organized crime activities. Known to operate in the Harbor area. Considered armed and dangerous.</p>
+                        <h2 class="wanted-name">Mike "The Shadow" Johnson</h2>
+                        <p class="wanted-description">Wanted for drug trafficking and organized crime involvement.</p>
                         <div class="wanted-alert">
                             IF YOU SEE THIS PERSON OR HAVE ANY TIPS REGARDING THEIR WHEREABOUTS, CALL 911!
                         </div>
@@ -209,6 +221,11 @@
     </section>
 
     <script src="auth.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Update edit buttons visibility on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRestrictedNav();
+        });
+    </script>
 </body>
 </html> 

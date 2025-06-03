@@ -105,15 +105,22 @@ function handleLogout() {
 function updateRestrictedNav() {
     const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
     const restrictedCreate = document.querySelectorAll('.restricted-create');
+    const editButtons = document.querySelectorAll('.edit-btn');
+    
+    console.log('Current auth data:', authData); // Debug log
     
     // Check if user has HR role
-    const isHR = authData.user?.roles?.some(role => [
-        '1363771721177628692', // HR role
-    ].includes(role));
+    const isHR = authData.user?.roles?.includes('1363771721177628692'); // HR role
+    console.log('Is HR:', isHR); // Debug log
     
     // Update visibility
     restrictedCreate.forEach(nav => {
-        nav.style.display = isHR ? '' : 'none';
+        nav.style.display = isHR ? 'block' : 'none';
+    });
+    
+    // Update edit button visibility
+    editButtons.forEach(btn => {
+        btn.style.display = isHR ? 'block' : 'none';
     });
 }
 
@@ -300,9 +307,15 @@ async function handleAuthToken(accessToken, tokenType) {
                 'Authorization': `${tokenType} ${accessToken}`
             }
         });
-        const memberData = await memberResponse.json();
 
-        // Store auth data
+        if (!memberResponse.ok) {
+            throw new Error('Failed to fetch guild member data');
+        }
+
+        const memberData = await memberResponse.json();
+        console.log('Member data:', memberData); // Debug log
+
+        // Store auth data with roles
         const authData = {
             token: accessToken,
             tokenType: tokenType,
@@ -313,6 +326,7 @@ async function handleAuthToken(accessToken, tokenType) {
             }
         };
         
+        console.log('Auth data being stored:', authData); // Debug log
         sessionStorage.setItem('discord_auth', JSON.stringify(authData));
         
         // Update UI
