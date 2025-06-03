@@ -1,14 +1,12 @@
 {
-  "name": "apd-chat",
+  "name": "apdpotential",
   "version": "1.0.0",
-  "private": true,
-  "engines": {
-    "node": "18"
-  },
+  "description": "APD Potential Website",
   "scripts": {
-    "dev": "netlify dev"
+    "build": "cd functions && npm install"
   },
-  "devDependencies": {
-    "netlify-cli": "^21.4.2"
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
   }
 }

@@ -1,7 +1,6 @@
 [build]
   publish = "."
   functions = "functions"
-  command = "cd functions && npm install"
 
 [functions]
   node_bundler = "esbuild"
@@ -16,9 +15,6 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
-[build.environment]
-  NODE_VERSION = "18"
 
 [[headers]]
   for = "/.netlify/functions/*"
