@@ -59,55 +59,64 @@
 
     <script src="script.js"></script>
     <script>
-    // Populate hidden creatorAvatar and profile preview
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-    // Populate hidden creatorAvatar and creatorUsername
-    document.getElementById('creatorAvatar').value = userData.avatar
-        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`
-        : '';
+    // Populate creator info from session storage
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const userData = authData.user || {};
+    
+    // Populate hidden fields and profile preview
+    document.getElementById('creatorAvatar').value = userData.avatar || '';
     document.getElementById('creatorUsername').value = userData.username || '';
+    
     if (userData.username) {
         const avatarEl = document.querySelector('.create-avatar');
         const usernameEl = document.querySelector('.create-username');
-        avatarEl.src = userData.avatar
-            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`
-            : 'https://cdn.discordapp.com/embed/avatars/0.png';
+        avatarEl.src = userData.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
         usernameEl.textContent = userData.username;
     }
+
     document.getElementById('update-form').addEventListener('submit', async e => {
         e.preventDefault();
-        const data = {};
-        new FormData(e.target).forEach((v, k) => data[k] = v);
+        const formData = new FormData(e.target);
+        const data = {
+            title: formData.get('title'),
+            date: formData.get('date'),
+            image: formData.get('image'),
+            description: formData.get('description'),
+            creator: {
+                username: userData.username,
+                avatar: userData.avatar
+            },
+            timestamp: new Date().toISOString()
+        };
+
         try {
-            const token = localStorage.getItem('discord_token');
-            console.log('Submitting announcement', data, token);
-            const res = await fetch('/.netlify/functions/updates.js', {
+            const res = await fetch('/.netlify/functions/updates', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': token
+                    'Authorization': `${authData.tokenType} ${authData.token}`
                 },
                 body: JSON.stringify(data)
             });
+
             if (res.ok) {
-                document.getElementById('form-msg').textContent = 'Announcement created successfully!';
+                document.getElementById('form-msg').textContent = 'Update created successfully!';
+                document.getElementById('form-msg').style.color = 'var(--accent)';
                 e.target.reset();
-                // Notify all clients about the new update
-                const eventSource = new EventSource('/.netlify/functions/notifications');
-                eventSource.onmessage = function(event) {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'new-update') {
-                        showUpdateNotification(data.update);
-                    }
-                };
+                
+                // Redirect to updates page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/updates.html';
+                }, 2000);
             } else {
-                const err = await res.json();
-                console.error('Error creating announcement:', err);
-                document.getElementById('form-msg').textContent = err.error || 'Error creating announcement.';
+                const error = await res.json();
+                document.getElementById('form-msg').textContent = error.message || 'Failed to create update.';
+                document.getElementById('form-msg').style.color = '#ff3b3b';
             }
         } catch (err) {
-            console.error('Network error:', err);
+            console.error('Error creating update:', err);
             document.getElementById('form-msg').textContent = 'Network error. Please try again.';
+            document.getElementById('form-msg').style.color = '#ff3b3b';
         }
     });
     </script>

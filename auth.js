@@ -104,23 +104,14 @@ function handleLogout() {
 // Update restricted navigation visibility
 function updateRestrictedNav() {
     const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
-    const restrictedNavs = document.querySelectorAll('.restricted-nav');
     const restrictedCreate = document.querySelectorAll('.restricted-create');
     
-    // Check if user has required roles
-    const hasAccess = authData.user?.roles?.some(role => [
-        '1363749144266674267', // Member role for documents access
-    ].includes(role));
-    
+    // Check if user has HR role
     const isHR = authData.user?.roles?.some(role => [
         '1363771721177628692', // HR role
     ].includes(role));
     
     // Update visibility
-    restrictedNavs.forEach(nav => {
-        nav.style.display = hasAccess ? '' : 'none';
-    });
-    
     restrictedCreate.forEach(nav => {
         nav.style.display = isHR ? '' : 'none';
     });
