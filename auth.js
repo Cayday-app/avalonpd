@@ -20,17 +20,32 @@ function deleteCookie(name) {
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; samesite=strict';
 }
 
+// Role definitions
+const ROLES = {
+    HR: '1363771721177628692',
+    OFFICER: '1363747433074655434', // Officer role
+    COMMAND: '1363747433074655435', // Command role
+    DETECTIVE: '1363747433074655436', // Detective role
+    FTO: '1363747433074655437' // FTO role
+};
+
+// Check if user has any of the specified roles
+function hasAnyRole(userRoles, requiredRoles) {
+    if (!userRoles || !Array.isArray(userRoles)) return false;
+    return requiredRoles.some(role => userRoles.includes(role));
+}
+
+// Check if user has a specific role
+function hasRole(userRoles, requiredRole) {
+    if (!userRoles || !Array.isArray(userRoles)) return false;
+    return userRoles.includes(requiredRole);
+}
+
 function initializeAuth() {
-    // Check if we have auth data
     const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
-    
-    // Update UI based on login state
     updateLoginState();
-    
-    // Update restricted nav visibility
     updateRestrictedNav();
     
-    // Hide loading overlay
     const loadingOverlay = document.getElementById('loading-overlay');
     if (loadingOverlay) {
         setTimeout(() => {
@@ -49,7 +64,6 @@ function updateLoginState() {
     
     if (loginBtn) {
         if (authData.user) {
-            // User is logged in
             loginBtn.innerHTML = `
                 <img src="${authData.user.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
                     alt="${authData.user.username}" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
@@ -57,7 +71,6 @@ function updateLoginState() {
             `;
             loginBtn.onclick = handleLogout;
         } else {
-            // User is not logged in
             loginBtn.innerHTML = `
                 <i class="fab fa-discord"></i>
                 LOGIN WITH DISCORD
@@ -120,17 +133,38 @@ function handleLogout() {
 // Update restricted navigation visibility
 function updateRestrictedNav() {
     const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const userRoles = authData.user?.roles || [];
+    
+    console.log('Current user roles:', userRoles);
+
+    // Elements that require any officer role
+    const restrictedNav = document.querySelectorAll('.restricted-nav');
+    const isOfficer = hasAnyRole(userRoles, [
+        ROLES.OFFICER,
+        ROLES.COMMAND,
+        ROLES.DETECTIVE,
+        ROLES.FTO
+    ]);
+
+    // Elements that require HR role
     const restrictedCreate = document.querySelectorAll('.restricted-create');
-    
-    // Check if user has HR role
-    const isHR = authData.user?.roles?.includes('1363771721177628692'); // HR role
-    console.log('Auth data:', authData);
-    console.log('Is HR:', isHR);
-    
-    // Update visibility
+    const isHR = hasRole(userRoles, ROLES.HR);
+
+    // Update visibility based on roles
+    restrictedNav.forEach(nav => {
+        nav.style.display = isOfficer ? 'inline-block' : 'none';
+    });
+
     restrictedCreate.forEach(nav => {
         nav.style.display = isHR ? 'inline-block' : 'none';
     });
+
+    // If not an officer and on a restricted page, redirect to home
+    const restrictedPages = ['/roster.html', '/sop.html', '/group.html', '/shift-log.html'];
+    if (!isOfficer && restrictedPages.includes(window.location.pathname)) {
+        window.location.href = '/';
+        showToast('Access denied. Officer role required.', true);
+    }
 }
 
 // Toast notification
@@ -320,6 +354,10 @@ async function handleAuthToken(accessToken, tokenType) {
         const memberData = await memberResponse.json();
         console.log('Member data:', memberData);
 
+        if (!memberData.roles || memberData.roles.length === 0) {
+            throw new Error('You must be a member of the Avalon Police Department Discord server.');
+        }
+
         // Store auth data
         const authData = {
             token: accessToken,
@@ -348,7 +386,7 @@ async function handleAuthToken(accessToken, tokenType) {
         window.location.href = redirectUrl;
     } catch (error) {
         console.error('Auth error:', error);
-        showToast('Authentication failed. Please try again.', true);
+        showToast(error.message || 'Authentication failed. Please try again.', true);
         window.location.href = '/';
     }
 } 
