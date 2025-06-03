@@ -5,31 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeAuth() {
-    // Check if we're on the callback page
-    if (window.location.pathname === '/auth/callback') {
-        // Add loading overlay if not present
-        let loadingOverlay = document.getElementById('loading-overlay');
-        if (!loadingOverlay) {
-            loadingOverlay = document.createElement('div');
-            loadingOverlay.id = 'loading-overlay';
-            loadingOverlay.innerHTML = `
-                <div class="loading-container">
-                    <div class="police-lights">
-                        <div class="police-light red"></div>
-                        <div class="police-light blue"></div>
-                    </div>
-                    <img src="/apdlogo.png" alt="APD Logo" class="loading-logo" />
-                </div>
-            `;
-            document.body.appendChild(loadingOverlay);
-        }
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
-    }
-
-    // Check login state
-    const token = localStorage.getItem('discord_token');
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    // Check if we have auth data
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
     
     // Update UI based on login state
     updateLoginState();
@@ -37,56 +14,30 @@ function initializeAuth() {
     // Update restricted nav visibility
     updateRestrictedNav();
     
-    // Handle OAuth code if present
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    const storedState = localStorage.getItem('discord_state');
-    
-    if (code) {
-        // Verify state to prevent CSRF attacks
-        if (state && state === storedState) {
-            handleAuthCode(code).catch(error => {
-                console.error('Auth error:', error);
-                showToast(error.message || 'Authentication failed', true);
-                // Redirect to home page on error
-                window.location.href = '/';
-            });
-        } else {
-            console.error('State mismatch');
-            showToast('Authentication failed: Invalid state', true);
-            // Redirect to home page on error
-            window.location.href = '/';
-        }
-        // Clean up state
-        localStorage.removeItem('discord_state');
-    } else {
-        // Hide loading overlay if no auth code
-        const loadingOverlay = document.getElementById('loading-overlay');
-        if (loadingOverlay) {
+    // Hide loading overlay
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        setTimeout(() => {
+            loadingOverlay.style.opacity = 0;
             setTimeout(() => {
-                loadingOverlay.style.opacity = 0;
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                }, 300);
-            }, 500);
-        }
+                loadingOverlay.style.display = 'none';
+            }, 300);
+        }, 500);
     }
 }
 
-// Update login button
+// Update login button and user state
 function updateLoginState() {
-    const token = localStorage.getItem('discord_token');
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
     const loginBtn = document.querySelector('.login-btn');
     
     if (loginBtn) {
-        if (token && userData.username) {
+        if (authData.user) {
             // User is logged in
             loginBtn.innerHTML = `
-                <img src="${userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                    alt="${userData.username}" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
-                ${userData.username}
+                <img src="${authData.user.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+                    alt="${authData.user.username}" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
+                ${authData.user.username}
             `;
             loginBtn.onclick = handleLogout;
         } else {
@@ -111,155 +62,88 @@ function generateState() {
 function handleDiscordAuth() {
     const clientId = '1363747847039881347';
     const redirectUri = 'https://avalonpd.netlify.app/auth/callback';
-    const scopes = encodeURIComponent('identify guilds guilds.members.read');
-    const guildId = '1363747433074655433';
+    const scopes = encodeURIComponent('identify guilds.members.read guilds');
     
     // Generate and store state for CSRF protection
     const state = generateState();
-    localStorage.setItem('discord_state', state);
+    sessionStorage.setItem('discord_state', state);
     
     // Save the current URL to return to after login
-    localStorage.setItem('login_redirect', window.location.href);
+    sessionStorage.setItem('login_redirect', window.location.href);
     
     const authUrl = `https://discord.com/oauth2/authorize` + 
         `?client_id=${clientId}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=code` +
+        `&response_type=token` + // Using implicit grant flow
         `&scope=${scopes}` +
         `&state=${state}` +
-        `&guild_id=${guildId}` +
         `&prompt=consent`;
     
     window.location.href = authUrl;
 }
 
-// Handle the authorization code from Discord
-async function handleAuthCode(code) {
-    try {
-        showToast('Authenticating...');
-        
-        console.log('Starting authentication process...');
-        const baseUri = window.location.origin;
-        const redirectUri = `${baseUri}/auth/callback`;
-        
-        const response = await fetch('/.netlify/functions/discord-auth', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                code,
-                redirectUri: redirectUri
-            })
-        });
-        
-        if (!response.ok) {
-            const text = await response.text();
-            console.error('Auth response error:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: text
-            });
-            throw new Error(text || 'Authentication failed');
-        }
-        
-        const data = await response.json();
-        console.log('Authentication response received');
-        
-        if (!data.token || !data.userData) {
-            console.error('Invalid response data:', data);
-            throw new Error('Invalid authentication response');
-        }
-        
-        // Store the data
-        localStorage.setItem('discord_token', data.token);
-        localStorage.setItem('user_data', JSON.stringify(data.userData));
-        localStorage.setItem('roles', JSON.stringify(data.roles));
-        localStorage.setItem('has_access', data.hasAccess ? 'true' : 'false');
-        localStorage.setItem('creator_role', data.creatorRole);
-        
-        // Update UI
-        updateLoginState();
-        updateRestrictedNav();
-        
-        // Remove the code from the URL without refreshing
-        const url = new URL(window.location.href);
-        url.searchParams.delete('code');
-        url.searchParams.delete('state');
-        window.history.replaceState({}, document.title, url.toString());
-        
-        showToast('Successfully logged in!');
-        
-        // Get the redirect URL and remove it from storage
-        const redirectUrl = localStorage.getItem('login_redirect') || '/';
-        localStorage.removeItem('login_redirect');
-        
-        // Only redirect if we're not already on the target page
-        if (window.location.pathname !== redirectUrl) {
-            window.location.href = redirectUrl;
-        }
-        
-    } catch (error) {
-        console.error('Authentication error:', error);
-        showToast(error.message || 'Authentication failed', true);
-        clearAuthData();
-        throw error;
-    }
-}
-
-// Clear all auth data
-function clearAuthData() {
-    localStorage.removeItem('discord_token');
-    localStorage.removeItem('user_data');
-    localStorage.removeItem('roles');
-    localStorage.removeItem('has_access');
-    localStorage.removeItem('creator_role');
-    localStorage.removeItem('login_redirect');
-}
-
 // Handle logout
 function handleLogout() {
-    if (confirm('Are you sure you want to log out?')) {
-        clearAuthData();
-        updateLoginState();
-        updateRestrictedNav();
-        showToast('Successfully logged out');
-        window.location.reload();
+    // Clear auth data
+    sessionStorage.removeItem('discord_auth');
+    
+    // Update UI
+    updateLoginState();
+    updateRestrictedNav();
+    
+    // Show toast
+    showToast('Successfully logged out!');
+    
+    // Redirect to home if on a restricted page
+    const restrictedPages = ['/roster.html', '/sop.html', '/group.html', '/shift-log.html'];
+    if (restrictedPages.includes(window.location.pathname)) {
+        window.location.href = '/';
     }
 }
 
-// Update restricted nav visibility
+// Update restricted navigation visibility
 function updateRestrictedNav() {
-    const token = localStorage.getItem('discord_token');
-    const hasAccess = localStorage.getItem('has_access') === 'true';
-    const userRoles = JSON.parse(localStorage.getItem('roles') || '[]');
+    const authData = JSON.parse(sessionStorage.getItem('discord_auth') || '{}');
+    const restrictedNavs = document.querySelectorAll('.restricted-nav');
+    const restrictedCreate = document.querySelectorAll('.restricted-create');
     
-    const restrictedNavItems = document.querySelectorAll('.restricted-nav');
-    restrictedNavItems.forEach(item => {
-        item.style.display = (token && hasAccess) ? 'block' : 'none';
+    // Check if user has required roles
+    const hasAccess = authData.user?.roles?.some(role => [
+        // Add your role IDs here
+        '1363747433074655433', // Example role ID
+    ].includes(role));
+    
+    const isCreator = authData.user?.roles?.some(role => [
+        // Add creator role IDs here
+        '1363747433074655434', // Example creator role ID
+    ].includes(role));
+    
+    // Update visibility
+    restrictedNavs.forEach(nav => {
+        nav.style.display = hasAccess ? '' : 'none';
     });
     
-    const restrictedCreateItems = document.querySelectorAll('.restricted-create');
-    const hasCreatorRole = userRoles.includes(localStorage.getItem('creator_role'));
-    restrictedCreateItems.forEach(item => {
-        item.style.display = (token && hasCreatorRole) ? 'block' : 'none';
+    restrictedCreate.forEach(nav => {
+        nav.style.display = isCreator ? '' : 'none';
     });
 }
 
-// Toast notification helper
+// Toast notification
 function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = 'toast' + (isError ? ' error' : '');
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        document.body.appendChild(toast);
+    }
+    
+    toast.className = isError ? 'toast error' : 'toast';
     toast.textContent = message;
-    document.body.appendChild(toast);
+    toast.style.display = 'block';
     
     setTimeout(() => {
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }, 100);
+        toast.style.display = 'none';
+    }, 3000);
 }
 
 // Add event listener to theme button
