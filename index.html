@@ -4,26 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APD Portal</title>
-    <!-- Base tag should be after meta tags -->
-    <base href="/">
-    <!-- Load external fonts first -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Load our CSS last -->
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <!-- Add critical styles inline to prevent FOUC -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Critical loading styles -->
     <style>
-        /* Critical styles to prevent flash of unstyled content */
-        body { 
-            opacity: 0; 
-            background: #0f0f0f;
-            margin: 0;
-            padding: 0;
-        }
-        body.loaded { 
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
         #loading-overlay {
             position: fixed;
             top: 0;
@@ -35,6 +20,8 @@
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
     </style>
 </head>
@@ -46,26 +33,24 @@
                 <div class="police-light red"></div>
                 <div class="police-light blue"></div>
             </div>
-            <img src="/apdlogo.png" alt="APD Logo" class="loading-logo" />
+            <img src="apdlogo.png" alt="APD Logo" class="loading-logo" />
         </div>
     </div>
 
-    <!-- Navigation -->
     <nav>
         <div class="nav-container">
             <div class="nav-links">
-                <a href="/"><img src="/apdlogo.png" alt="APD Logo" class="nav-logo"></a>
+                <a href="/"><img src="apdlogo.png" alt="APD Logo" class="nav-logo"></a>
                 <a href="/">HOME</a>
                 <a href="/coc.html">COC</a>
-                <a href="/restricted.html" class="restricted-nav">ROSTER</a>
+                <a href="/roster.html" class="restricted-nav">ROSTER</a>
                 <a href="/sop.html" class="restricted-nav">SOP</a>
-                <a href="/department-group.html" class="restricted-nav">GROUP</a>
-                <a href="/shift-logging.html" class="restricted-nav">SHIFT LOG</a>
+                <a href="/group.html" class="restricted-nav">GROUP</a>
+                <a href="/shift-log.html" class="restricted-nav">SHIFT LOG</a>
                 <a href="/create-update.html" class="restricted-create">CREATE UPDATE</a>
                 <a href="/updates.html">UPDATES</a>
             </div>
             <div class="nav-icons">
-                <button id="theme-btn" class="theme-btn">⚙️</button>
                 <button onclick="handleDiscordAuth()" class="login-btn">
                     <i class="fab fa-discord"></i>
                     LOGIN WITH DISCORD
@@ -74,136 +59,41 @@
         </div>
     </nav>
 
-    <!-- Theme selection modal -->
-    <div id="theme-modal" class="theme-modal">
-        <div class="theme-modal-content">
-            <span id="close-theme-modal" class="close">&times;</span>
-            <h2>Choose Theme</h2>
-            <div class="theme-type-options">
-                <label><input type="radio" name="theme-type" value="solid" checked> Solid</label>
-                <label><input type="radio" name="theme-type" value="gradient"> Gradient</label>
-            </div>
-            <div class="theme-color-pickers">
-                <label>Color 1: <input type="color" id="theme-color1" value="#0f0f0f"></label>
-                <label>Color 2: <input type="color" id="theme-color2" value="#3498db"></label>
-            </div>
-            <button id="apply-theme-btn">Apply</button>
-        </div>
-    </div>
-
-    <!-- Hero Section -->
     <div class="hero">
         <h1>AVALON POLICE DEPARTMENT</h1>
         <p>Dedicated to keeping our city safe through professionalism, integrity, and community service.</p>
         <div class="join-button-container">
-            <a href="https://discord.gg/FP9uUBQJSt" target="_blank" class="join-button">
-                JOIN NOW
-            </a>
+            <a href="https://discord.gg/FP9uUBQJSt" target="_blank" class="join-button">JOIN NOW</a>
         </div>
     </div>
 
-    <!-- Recent Updates Section -->
-    <section class="recent-updates-section">
-        <h2>RECENT UPDATES</h2>
-        <div class="updates-bubble-container">
-            <!-- Content will be loaded dynamically using JavaScript -->
-        </div>
-    </section>
-
-    <!-- Team Section -->
     <section class="team-section">
         <h2>MEET OUR TEAM</h2>
         <div class="team-grid">
             <div class="team-member">
-                <img src="/placeholder.jpg" alt="Team Member">
+                <img src="placeholder.jpg" alt="Team Member">
                 <h3>Jefferson Rebel</h3>
                 <div class="role">Chief of Police</div>
                 <p>Leading the department with years of experience.</p>
             </div>
-
             <div class="team-member">
-                <img src="/placeholder2.jpg" alt="Team Member">
+                <img src="placeholder2.jpg" alt="Team Member">
                 <h3>D. Cooper</h3>
                 <div class="role">Police Major</div>
-                <p>I'm the Police Major with Avalon PD. I oversee multiple divisions, coordinate department-wide operations, and ensure our long-term strategies keep this city safe.</p>
+                <p>Overseeing multiple divisions and coordinating department-wide operations.</p>
             </div>
-
             <div class="team-member">
-                <img src="/placeholder3.jpg" alt="Team Member">
+                <img src="placeholder3.jpg" alt="Team Member">
                 <h3>That_guy</h3>
                 <div class="role">Police Captain</div>
-                <p>I'm a Captain with Avalon PD. I manage day-to-day operations within my division, lead our officers on the ground, and make sure our team runs smoothly and effectively.</p>
+                <p>Managing day-to-day operations within the division.</p>
             </div>
         </div>
     </section>
 
-    <!-- Debug Panel -->
-    <div id="debug-panel" style="display: none; position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; z-index: 9999; color: white; font-family: monospace; max-width: 800px; max-height: 400px; overflow: auto;">
-        <h4>Debug Panel</h4>
-        <div id="debug-info"></div>
-        <button id="check-config" style="margin-top: 10px; padding: 5px 10px;">Check Configuration</button>
-        <button id="close-debug" style="margin-top: 10px; padding: 5px 10px; float: right;">Close</button>
-    </div>
+    <footer>© Made by Cayday</footer>
 
-    <!-- Footer -->
-    <footer>
-        © Made by Cayday
-    </footer>
-
-    <!-- Scripts -->
-    <script src="/script.js"></script>
-    <script src="/auth.js"></script>
-    <script>
-    // Debug helpers - press Ctrl+Shift+D to show debug panel
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-            const panel = document.getElementById('debug-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        }
-    });
-
-    // Close button
-    document.getElementById('close-debug').addEventListener('click', function() {
-        document.getElementById('debug-panel').style.display = 'none';
-    });
-
-    // Check config button
-    document.getElementById('check-config').addEventListener('click', async function() {
-        const infoDiv = document.getElementById('debug-info');
-        infoDiv.innerHTML = 'Checking configuration...';
-        
-        try {
-            // Check if Netlify functions are accessible
-            const statusCheck = await fetch('/.netlify/functions/discord-status')
-                .then(res => res.ok ? res.json() : {status: 'error', message: `HTTP ${res.status}`})
-                .catch(err => ({status: 'error', message: err.message}));
-                
-            // Check config values
-            const configInfo = {
-                redirectUri: window.config?.discord?.redirectUri || 'Not set',
-                clientId: window.config?.discord?.clientId || 'Not set',
-                guildId: window.config?.discord?.guildId || 'Not set',
-                currentUrl: window.location.href,
-                hostname: window.location.hostname
-            };
-            
-            // Format the output
-            let output = '<h4>Configuration Check</h4>';
-            output += `<p>Current URL: ${configInfo.currentUrl}</p>`;
-            output += `<p>Redirect URI: ${configInfo.redirectUri}</p>`;
-            
-            if (configInfo.redirectUri.indexOf(configInfo.hostname) === -1) {
-                output += `<p style="color: #ff6b6b;"><strong>WARNING:</strong> Redirect URI doesn't match current hostname!</p>`;
-            }
-            
-            output += '<h4>Netlify Functions Status</h4>';
-            output += `<pre>${JSON.stringify(statusCheck, null, 2)}</pre>`;
-            
-            infoDiv.innerHTML = output;
-        } catch (err) {
-            infoDiv.innerHTML = `<p>Error checking configuration: ${err.message}</p>`;
-        }
-    });
-    </script>
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
 </body>
 </html> 

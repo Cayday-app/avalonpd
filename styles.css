@@ -23,6 +23,7 @@ html, body {
     line-height: 1.6;
     background-color: var(--background);
     color: var(--text);
+    visibility: visible !important;
 }
 
 body {
@@ -30,6 +31,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    opacity: 1 !important;
 }
 
 nav {
@@ -46,7 +48,7 @@ nav {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-nav .nav-container {
+.nav-container {
     display: flex;
     align-items: center;
     gap: 15px;
@@ -57,14 +59,14 @@ nav .nav-container {
     justify-content: space-between;
 }
 
-nav .nav-links {
+.nav-links {
     display: flex;
     align-items: center;
     gap: 15px;
     flex: 1;
 }
 
-nav img.nav-logo {
+.nav-logo {
     height: 28px;
     margin-right: 0.5rem;
 }
@@ -78,8 +80,6 @@ nav a {
     border-radius: 8px;
     position: relative;
     overflow: hidden;
-    font-size: 14px;
-    letter-spacing: 0.5px;
 }
 
 nav a:hover {
@@ -104,28 +104,18 @@ nav a:hover::after {
     width: 80%;
 }
 
-.nav-icons {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-left: auto;
-}
-
 .login-btn {
     background: linear-gradient(45deg, var(--accent), #2980b9);
-    color: white !important;
+    color: white;
     border: none;
-    padding: 10px 20px !important;
+    padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
-    text-decoration: none;
     box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
 }
 
@@ -133,28 +123,6 @@ nav a:hover::after {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
     background: linear-gradient(45deg, #2980b9, var(--accent));
-}
-
-.login-btn i {
-    font-size: 16px;
-}
-
-.theme-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text);
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.theme-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
 }
 
 .hero {
@@ -166,7 +134,7 @@ nav a:hover::after {
     text-align: center;
     position: relative;
     padding: 0 20px;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/police_lineup.jpg');
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('police_lineup.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -190,11 +158,6 @@ nav a:hover::after {
     100% { background-position: 0% 50%; }
 }
 
-.hero img {
-    max-width: 100%;
-    height: auto;
-}
-
 .hero p {
     color: var(--text);
     font-size: 1.2rem;
@@ -204,63 +167,27 @@ nav a:hover::after {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Page content styles */
-.content {
-    max-width: 1200px;
-    margin: 100px auto;
-    padding: 20px;
+.join-button {
+    background: linear-gradient(45deg, var(--accent), #2980b9);
+    color: var(--text);
+    text-decoration: none;
+    padding: 20px 40px;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
+.join-button:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
+    background: linear-gradient(45deg, #2980b9, var(--accent));
 }
 
-.content-section {
-    background: var(--primary);
-    border-radius: 10px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.content-section h2 {
-    color: var(--accent);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-.content-section ul {
-    list-style: none;
-    margin-left: 0;
-}
-
-.content-section ul li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.content-section ul li:last-child {
-    border-bottom: none;
-}
-
-small {
-    color: var(--accent);
-    display: block;
-    margin-top: 1rem;
-}
-
-h2 {
-    margin: 20px 0 10px;
-}
-
-ul {
-    margin-left: 20px;
-    margin-bottom: 20px;
-}
-
-/* Team Section */
 .team-section {
     background: linear-gradient(rgba(26, 26, 26, 0.95), rgba(26, 26, 26, 0.95)), url('police_cars.jpg');
     background-size: cover;
@@ -348,62 +275,68 @@ ul {
     line-height: 1.6;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
-    }
-    
-    70% {
-        transform: scale(1.05);
-        box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
-    }
-    
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
-    }
-}
-
-.join-button-container {
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-}
-
-.join-button {
-    background: linear-gradient(45deg, var(--accent), #2980b9);
+footer {
+    text-align: center;
+    padding: 2rem;
+    background: var(--primary);
     color: var(--text);
-    border: none;
-    padding: 20px 40px;
-    border-radius: 12px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-    outline: none;
+    opacity: 0.7;
 }
 
-.join-button:hover {
-    transform: translateY(-3px) scale(1.04);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
-    background: linear-gradient(45deg, #2980b9, var(--accent));
+/* Page content styles */
+.content {
+    max-width: 1200px;
+    margin: 100px auto;
+    padding: 20px;
 }
 
-.join-button:focus {
-    outline: 2px solid var(--accent);
+.content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
-.join-button::before, .join-button::after {
-    display: none !important;
+.content-section {
+    background: var(--primary);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.content-section h2 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.content-section ul {
+    list-style: none;
+    margin-left: 0;
+}
+
+.content-section ul li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.content-section ul li:last-child {
+    border-bottom: none;
+}
+
+small {
+    color: var(--accent);
+    display: block;
+    margin-top: 1rem;
+}
+
+h2 {
+    margin: 20px 0 10px;
+}
+
+ul {
+    margin-left: 20px;
+    margin-bottom: 20px;
 }
 
 /* Updates Section */
@@ -518,7 +451,6 @@ ul {
     align-items: center;
     justify-content: center;
     z-index: 2000;
-    overflow: hidden;
 }
 
 .loading-container {
@@ -564,12 +496,12 @@ ul {
 }
 
 @keyframes policeChaseFlash {
-    0%   { 
+    0% { 
         opacity: 0.2; 
         filter: blur(80px) brightness(1) saturate(2);
         transform: translateY(-50%) scale(0.8);
     }
-    50%  { 
+    50% { 
         opacity: 1; 
         filter: blur(100px) brightness(1.8) saturate(3);
         transform: translateY(-50%) scale(1.1);
