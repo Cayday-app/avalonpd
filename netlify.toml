@@ -43,7 +43,7 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, HEAD"
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    Cache-Control = "no-cache"
+    Cache-Control = "public, max-age=0, must-revalidate"
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     Content-Security-Policy = "default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; connect-src 'self' https://discord.com/api/ https://*.discord.com/api/ https://*.netlify.app/ https://*.netlify.com/;"
@@ -52,7 +52,7 @@
   for = "/*.html"
     [headers.values]
     Content-Type = "text/html; charset=utf-8"
-    Cache-Control = "no-cache"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/*.css"
